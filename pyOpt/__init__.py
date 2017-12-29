@@ -1,6 +1,7 @@
 #!/usr/bin/env python
 
-import os,sys
+import os
+import sys
 
 from pyOpt_history import History
 from pyOpt_parameter import Parameter
@@ -21,6 +22,5 @@ for f in os.listdir(dir):
             __all__.extend(sys.modules['pyOpt.'+f].__all__)
         except:
             continue
-        #end
-    #end
-#end
+
+__version__ = "1.2.0"
