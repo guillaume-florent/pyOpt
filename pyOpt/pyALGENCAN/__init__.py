@@ -6,4 +6,3 @@ try:
     __all__ = ['ALGENCAN']
 except:
     __all__ = []
-#end
