@@ -1,4 +1,6 @@
 #!/usr/bin/env python
+# coding: utf-8
+
 '''
 pyALPSO - A Python pyOpt interface to ALPSO.
 
@@ -77,13 +79,13 @@ eps = 2.0*eps
 # ALPSO Optimizer Class
 # =============================================================================
 class ALPSO(Optimizer):
-	
+
 	'''
 	ALPSO Optimizer Class - Inherited from Optimizer Abstract Class
 	'''
-	
+
 	def __init__(self, pll_type=None, *args, **kwargs):
-		
+
 		'''
 		ALPSO Optimizer Class Initialization
 		
@@ -93,59 +95,59 @@ class ALPSO(Optimizer):
 		
 		Documentation last updated:  February. 2, 2011 - Ruben E. Perez
 		'''
-		
+
 		#
 		if (pll_type == None):
-			
+
 			try:
 				import alpso as alpso
 			except:
 				raise ImportError('pyALPSO: ALPSO shared library failed to import')
 			#end
-			
+
 			name = 'ALPSO'
 			self.alpso = alpso
 		elif (pll_type.upper() == 'SPM'):
-			
+
 			try:
 				import alpso_spm
 				from mpi4py import MPI
 			except:
 				raise ImportError('pyALPSO: ALPSO SPM shared library failed to import')
 			#end
-			
+
 			name = 'ALPSO - SPM'
 			self.alpso = alpso_spm
 		elif (pll_type.upper() == 'DPM'):
-			
+
 			#if not 'alpso_dpm' in sys.modules:
 			#	raise ImportError('pyALPSO: ALPSO DPM shared library failed to import')
 			##end
-			
+
 			try:
 				import alpso_dpm
 				from mpi4py import MPI
 			except:
 				raise ImportError('pyALPSO: ALPSO DPM shared library failed to import')
 			#end
-			
+
 			name = 'ALPSO - DPM'
 			self.alpso = alpso_dpm
 		elif (pll_type.upper() == 'POA'):
-			
+
 			try:
 				import alpso_poa
 				from mpi4py import MPI
 			except:
 				raise ImportError('pyALPSO: ALPSO POA shared library failed to import')
 			#end
-			
+
 			name = 'ALPSO - POA'
 			self.alpso = alpso_poa
 		else:
 			raise ValueError("pll_type must be either None,'SPM', 'DPM' or 'POA'")
 		#end
-		
+
 		category = 'Global Optimizer'
 		def_opts = {
 		'SwarmSize':[int,40],			# Number of Particles (Depends on Problem dimensions)
@@ -155,8 +157,8 @@ class ALPSO(Optimizer):
 		'dynInnerIter':[int,0],			# Dynamic Number of Inner Iterations Flag
 		'stopCriteria':[int,1],			# Stopping Criteria Flag (0 - maxIters, 1 - convergence)
 		'stopIters':[int,5],			# Consecutively Number of Iterations for which the Stopping Criteria must be Satisfied
-		'etol':[float,1e-3],			# Absolute Tolerance for Equality constraints 
-		'itol':[float,1e-3],			# Absolute Tolerance for Inequality constraints 
+		'etol':[float,1e-3],			# Absolute Tolerance for Equality constraints
+		'itol':[float,1e-3],			# Absolute Tolerance for Inequality constraints
 		#'ltol':[float,1e-2],			# Absolute Tolerance for Lagrange Multipliers
 		'rtol':[float,1e-2],			# Relative Tolerance for Lagrange Multipliers
 		'atol':[float,1e-2],			# Absolute Tolerance for Lagrange Function
@@ -181,21 +183,21 @@ class ALPSO(Optimizer):
 		'HoodSize':[int,40],			# Number of Neighbours of Each Particle
 		'HoodModel':[str,'gbest'],		# Neighbourhood Model (dl/slring - Double/Single Link Ring, wheel - Wheel, Spatial - based on spatial distance, sfrac - Spatial Fraction)
 		'HoodSelf':[int,1],				# Selfless Neighbourhood Model (0 - Include Particle i in NH i, 1 - Don't Include Particle i)
-		'Scaling':[int,1],				# Design Variables Scaling Flag (0 - no scaling, 1 - scaling between [-1,1]) 
+		'Scaling':[int,1],				# Design Variables Scaling Flag (0 - no scaling, 1 - scaling between [-1,1])
 		}
 		informs = {}
 		Optimizer.__init__(self, name, category, def_opts, informs, *args, **kwargs)
-		
+
 		#
 		if (self.name in ('ALPSO - SPM','ALPSO - DPM','ALPSO - POA')):
 			self.myrank = MPI.COMM_WORLD.Get_rank()
 		else:
 			self.myrank = 0
 		#end
-		
-		
+
+
 	def __solve__(self, opt_problem={}, store_sol=True, disp_opts=False, xstart=[], store_hst=False, hot_start=False, *args, **kwargs):
-		
+
 		'''
 		Run Optimizer (Optimize Routine)
 		
@@ -212,7 +214,7 @@ class ALPSO(Optimizer):
 		
 		Documentation last updated:  February. 2, 2011 - Ruben E. Perez
 		'''
-		
+
 		#
 		if kwargs.has_key('display_opts'):
 			sol_dispOpt = kwargs['display_opts']
@@ -220,19 +222,19 @@ class ALPSO(Optimizer):
 		else:
 			sol_dispOpt = False
 		#end
-		
+
 		myrank = self.myrank
-		
+
 		#
 		def_fname = self.options['filename'][1].split('.out')[0]
 		hos_file, log_file, tmp_file = self._setHistory(opt_problem.name, store_hst, hot_start, def_fname)
-		
-		
+
+
 		#======================================================================
 		# ALPSO - Objective/Constraint Values Function
 		#======================================================================
 		def objconfunc(x):
-			
+
 			# Variables Groups Handling
 			if opt_problem.use_groups:
 				xg = {}
@@ -247,11 +249,11 @@ class ALPSO(Optimizer):
 			else:
 				xn = x
 			#end
-			
+
 			# Evaluate User Function
 			[ff,gg,fail] = opt_problem.obj_fun(xn, *args, **kwargs)
-			
-			# 
+
+			#
 			g = numpy.zeros(len(opt_problem._constraints.keys()),float)
 			if (fail == 1):
 				# Objective Assigment
@@ -276,11 +278,11 @@ class ALPSO(Optimizer):
 					#end
 				#end
 			#end
-			
+
 			return f,g
-		
-		
-		
+
+
+
 		# Variables Handling
 		n = len(opt_problem._variables.keys())
 		xl = numpy.zeros(n,float)
@@ -297,8 +299,8 @@ class ALPSO(Optimizer):
 			#end
 			i += 1
 		#end
-		
-		# Variables Groups Handling 
+
+		# Variables Groups Handling
 		if opt_problem.use_groups:
 			group_ids = {}
 			k = 0
@@ -308,7 +310,7 @@ class ALPSO(Optimizer):
 				k += group_len
 			#end
 		#end
-		
+
 		# Constraints Handling
 		m = len(opt_problem._constraints.keys())
 		me = 0
@@ -321,12 +323,12 @@ class ALPSO(Optimizer):
 			#end
 			#i += 1
 		#end
-		
+
 		# Objective Handling
 		objfunc = opt_problem.obj_fun
 		nobj = len(opt_problem._objectives.keys())
-		
-		
+
+
 		# Setup argument list values
 		nob = self.options['SwarmSize'][1]
 		nhn = self.options['HoodSize'][1]
@@ -374,7 +376,7 @@ class ALPSO(Optimizer):
 			raise IOError('Incorrect fileout Setting')
 		#end
 		filename = self.options['filename'][1]
-		
+
 		seed = self.options['seed'][1]
 		if seed == 0:
 			seed = time.time()
@@ -404,17 +406,17 @@ class ALPSO(Optimizer):
 				xs = xstart
 			#end
 		#end
-		
-		
+
+
 		# Run ALPSO
 		t0 = time.time()
 		opt_x,opt_f,opt_g,opt_lambda,nfevals,rseed = self.alpso.alpso(n,m,me,
 			type,xs,xl,xu,nob,nhn,nhm,imax,cmax,cmin,stop,nstop,etol,itol,
 			rtol,atol,dtol,oout,iout,rinit,vinit,vmax,c1,c2,w1,w2,ns,nf,vcrazy,
 			fileout,filename,log_file,hos_file,seed,scale,nhs,objconfunc)
-		sol_time = time.time() - t0 
+		sol_time = time.time() - t0
 		sol_evals = nfevals
-		
+
 		if (myrank == 0):
 			if self.sto_hst:
 				log_file.close()
@@ -428,36 +430,36 @@ class ALPSO(Optimizer):
 				#end
 			#end
 		#end
-		
+
 		# Store Results
 		if store_sol:
-			
+
 			sol_name = 'ALPSO Solution to ' + opt_problem.name
-			
+
 			sol_options = copy.copy(self.options)
 			if sol_options.has_key('defaults'):
 				del sol_options['defaults']
 			#end
-			
+
 			sol_inform = {}
 			#sol_inform['value'] = inform
 			#sol_inform['text'] = self.getInform(inform)
-			
-			
+
+
 			sol_vars = copy.deepcopy(opt_problem._variables)
 			i = 0
 			for key in sol_vars.keys():
 				sol_vars[key].value = opt_x[i]
 				i += 1
 			#end
-			
+
 			sol_objs = copy.deepcopy(opt_problem._objectives)
 			i = 0
 			for key in sol_objs.keys():
 				sol_objs[key].value = opt_f	# Note: takes only one!
 				i += 1
 			#end
-			
+
 			if m > 0:
 				sol_cons = copy.deepcopy(opt_problem._constraints)
 				i = 0
@@ -468,7 +470,7 @@ class ALPSO(Optimizer):
 			else:
 				sol_cons = {}
 			#end
-			
+
 			if m > 0:
 				sol_lambda = numpy.zeros(m ,float)
 				for i in xrange(m):
@@ -477,42 +479,42 @@ class ALPSO(Optimizer):
 			else:
 				sol_lambda = {}
 			#end
-			
-			
-			opt_problem.addSol(self.__class__.__name__, sol_name, objfunc, sol_time, 
-				sol_evals, sol_inform, sol_vars, sol_objs, sol_cons, sol_options, 
+
+
+			opt_problem.addSol(self.__class__.__name__, sol_name, objfunc, sol_time,
+				sol_evals, sol_inform, sol_vars, sol_objs, sol_cons, sol_options,
 				display_opts=disp_opts, Lambda=sol_lambda, Seed=rseed, myrank=self.myrank,
 				arguments=args, **kwargs)
 		#end
-		
-		
+
+
 		return opt_f, opt_x, {'opt_g':opt_g,'fevals':sol_evals,'time':sol_time}
-		
-		
+
+
 	def _on_setOption(self, name, value):
-		
+
 		'''
 		Set Optimizer Option Value (Optimizer Specific Routine)
 		
 		Documentation last updated:  May. 16, 2008 - Ruben E. Perez
 		'''
-		
+
 		pass
-		
-		
+
+
 	def _on_getOption(self, name):
-		
+
 		'''
 		Get Optimizer Option Value (Optimizer Specific Routine)
 		
 		Documentation last updated:  May. 16, 2008 - Ruben E. Perez
 		'''
-		
+
 		pass
-		
-		
+
+
 	def _on_getInform(self, infocode):
-		
+
 		'''
 		Get Optimizer Result Information (Optimizer Specific Routine)
 		
@@ -522,29 +524,29 @@ class ALPSO(Optimizer):
 		
 		Documentation last updated:  May. 16, 2008 - Ruben E. Perez
 		'''
-		
+
 		pass
-		
-		
+
+
 	def _on_flushFiles(self):
-		
+
 		'''
 		Flush the Output Files (Optimizer Specific Routine)
 		
 		Documentation last updated:  August. 09, 2009 - Ruben E. Perez
 		'''
-		
+
 		pass
-	
+
 
 
 #==============================================================================
 # ALPSO Optimizer Test
 #==============================================================================
 if __name__ == '__main__':
-	
+
 	# Test ALPSO
 	print 'Testing ...'
 	alpso = ALPSO()
 	print alpso
-	
+

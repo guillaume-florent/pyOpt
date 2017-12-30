@@ -1,4 +1,6 @@
 #!/usr/bin/env python
+# coding: utf-8
+
 '''
 pyCONMIN - A Python pyOpt interface to CONMIN. 
 
@@ -77,13 +79,13 @@ eps = 2.0*eps
 # CONMIN Optimizer Class
 # =============================================================================
 class CONMIN(Optimizer):
-	
+
 	'''
 	CONMIN Optimizer Class - Inherited from Optimizer Abstract Class
 	'''
-	
+
 	def __init__(self, pll_type=None, *args, **kwargs):
-		
+
 		'''
 		CONMIN Optimizer Class Initialization
 		
@@ -93,7 +95,7 @@ class CONMIN(Optimizer):
 		
 		Documentation last updated:  Feb. 16, 2010 - Peter W. Jansen
 		'''
-		
+
 		#
 		if (pll_type == None):
 			self.poa = False
@@ -102,7 +104,7 @@ class CONMIN(Optimizer):
 		else:
 			raise ValueError("pll_type must be either None or 'POA'")
 		#end
-		
+
 		#
 		name = 'CONMIN'
 		category = 'Local Optimizer'
@@ -110,8 +112,8 @@ class CONMIN(Optimizer):
 		'ITMAX':[int,1e4],			# Maximum Number of Iterations
 		'DELFUN':[float,1e-6],		# Objective Relative Tolerance
 		'DABFUN':[float,1e-6],		# Objective Absolute Tolerance
-		'ITRM':[int,2],				# 
-		'NFEASCT':[int,20],			# 
+		'ITRM':[int,2],				#
+		'NFEASCT':[int,20],			#
 		'IPRINT':[int,2],			# Print Control (0 - None, 1 - Final, 2,3,4,5 - Debug)
 		'IOUT':[int,6],     		# Output Unit Number
 		'IFILE':[str,'CONMIN.out'],	# Output File Name
@@ -119,10 +121,10 @@ class CONMIN(Optimizer):
 		informs = {
 		}
 		Optimizer.__init__(self, name, category, def_opts, informs, *args, **kwargs)
-		
-		
+
+
 	def __solve__(self, opt_problem={}, sens_type='FD', store_sol=True, store_hst=False, hot_start=False, disp_opts=False, sens_mode='', sens_step={}, *args, **kwargs):
-		
+
 		'''
 		Run Optimizer (Optimize Routine)
 		
@@ -141,12 +143,12 @@ class CONMIN(Optimizer):
 		
 		Documentation last updated:  February. 2, 2011 - Ruben E. Perez
 		'''
-		
-		# 
+
+		#
 		if ((self.poa) and (sens_mode.lower() == 'pgc')):
 			raise NotImplementedError("pyCONMIN- Current implementation only allows single level parallelization, either 'POA' or 'pgc'")
 		#end
-		
+
 		if self.poa or (sens_mode.lower() == 'pgc'):
 			try:
 				import mpi4py
@@ -167,22 +169,22 @@ class CONMIN(Optimizer):
 			self.pll = False
 			self.myrank = 0
 		#end
-		
+
 		myrank = self.myrank
-		
-		# 
+
+		#
 		def_fname = self.options['IFILE'][1].split('.')[0]
 		hos_file, log_file, tmp_file = self._setHistory(opt_problem.name, store_hst, hot_start, def_fname)
-		
-		# 
+
+		#
 		gradient = Gradient(opt_problem, sens_type, sens_mode, sens_step, *args, **kwargs)
-		
-		
+
+
 		#======================================================================
 		# CONMIN - Objective/Constraint Values Function
 		#======================================================================
 		def cnmnfun(n1,n2,x,f,g):
-			
+
 			# Variables Groups Handling
 			if opt_problem.use_groups:
 				xg = {}
@@ -197,10 +199,10 @@ class CONMIN(Optimizer):
 			else:
 				xn = x
 			#end
-			
+
 			# Flush Output Files
 			self.flushFiles()
-			
+
 			# Evaluate User Function
 			fail = 0
 			ff = []
@@ -216,16 +218,16 @@ class CONMIN(Optimizer):
 					#end
 				#end
 			#end
-			
+
 			if self.pll:
 				self.h_start = Bcast(self.h_start,root=0)
 			#end
 			if self.h_start and self.pll:
 				[ff,gg,fail] = Bcast([ff,gg,fail],root=0)
-			elif not self.h_start:	
+			elif not self.h_start:
 				[ff,gg,fail] = opt_problem.obj_fun(xn, *args, **kwargs)
 			#end
-			
+
 			# Store History
 			if (myrank == 0):
 				if self.sto_hst:
@@ -235,14 +237,14 @@ class CONMIN(Optimizer):
 					log_file.write(fail,'fail')
 				#end
 			#end
-			
+
 			# Objective Assigment
 			if isinstance(ff,complex):
 				f = ff.astype(float)
 			else:
 				f = ff
 			#end
-			
+
 			# Constraints Assigment
 			for i in xrange(len(opt_problem._constraints.keys())):
 				if isinstance(gg[i],complex):
@@ -251,16 +253,16 @@ class CONMIN(Optimizer):
 					g[i] = gg[i]
 				#end
 			#end
-			
+
 			return f,g
-		
-		
+
+
 		#======================================================================
 		# CONMIN - Objective/Constraint Gradients Function
 		#======================================================================
 		def cnmngrd(n1,n2,x,f,g,ct,df,a,ic,nac):
-			
-			# 
+
+			#
 			nac = 0
 			for j in xrange(len(opt_problem._constraints.keys())):
 				if (g[j] >= ct):
@@ -268,8 +270,8 @@ class CONMIN(Optimizer):
 					nac += 1
 				#end
 			#end
-			
-			# 
+
+			#
 			if self.h_start:
 				dff = []
 				dgg = []
@@ -280,7 +282,7 @@ class CONMIN(Optimizer):
 						hos_file.close()
 					else:
 						dff = vals['grad_obj'][0].reshape((len(opt_problem._objectives.keys()),len(opt_problem._variables.keys())))
-						dgg = vals['grad_con'][0].reshape((len(opt_problem._constraints.keys()),len(opt_problem._variables.keys())))	
+						dgg = vals['grad_con'][0].reshape((len(opt_problem._constraints.keys()),len(opt_problem._variables.keys())))
 					#end
 				#end
 				if self.pll:
@@ -290,20 +292,20 @@ class CONMIN(Optimizer):
 					[dff,dgg] = Bcast([dff,dgg],root=0)
 				#end
 			#end
-			
+
 			if not self.h_start:
-				
-				# 
+
+				#
 				dff,dgg = gradient.getGrad(x, group_ids, [f], g[0:len(opt_problem._constraints.keys())], *args, **kwargs)
-				
+
 			#end
-			
+
 			# Store History
 			if self.sto_hst and (myrank == 0):
 				log_file.write(dff,'grad_obj')
 				log_file.write(dgg,'grad_con')
 			#end
-			
+
 			# Gradient Assignment
 			for i in xrange(len(opt_problem._variables.keys())):
 				df[i] = dff[0,i]
@@ -315,11 +317,11 @@ class CONMIN(Optimizer):
 					#end
 				#end
 			#end
-			
+
 			return df,a,ic,nac
-		
-		
-		
+
+
+
 		# Variables Handling
 		nvar = len(opt_problem._variables.keys())
 		xl = []
@@ -339,7 +341,7 @@ class CONMIN(Optimizer):
 		xl = numpy.array(xl)
 		xu = numpy.array(xu)
 		xx = numpy.array(xx)
-		
+
 		# Variables Groups Handling
 		group_ids = {}
 		if opt_problem.use_groups:
@@ -350,7 +352,7 @@ class CONMIN(Optimizer):
 				k += group_len
 			#end
 		#end
-		
+
 		# Constraints Handling
 		ncon = len(opt_problem._constraints.keys())
 		#neqc = 0
@@ -365,7 +367,7 @@ class CONMIN(Optimizer):
 			#end
 		#end
 		#gg = numpy.array(gg)
-		
+
 		# Objective Handling
 		objfunc = opt_problem.obj_fun
 		nobj = len(opt_problem._objectives.keys())
@@ -374,8 +376,8 @@ class CONMIN(Optimizer):
 			ff.append(opt_problem._objectives[key].value)
 		#end
 		ff = numpy.array(ff,numpy.float)
-		
-		
+
+
 		# Setup argument list values
 		ndv = numpy.array([nvar], numpy.int)
 		ncn = numpy.array([ncon], numpy.int)
@@ -409,25 +411,25 @@ class CONMIN(Optimizer):
 		#end
 		itmax = numpy.array([self.options['ITMAX'][1]], numpy.int)
 		delfun = numpy.array([self.options['DELFUN'][1]], numpy.float)
-		
+
 		finit,ginit = cnmnfun([],[],xx,ff,gg)
 		dabfun = numpy.array([self.options['DABFUN'][1]*finit], numpy.float)
-		
+
 		itrm = numpy.array([self.options['ITRM'][1]], numpy.int)
 		nfeasct = numpy.array([self.options['NFEASCT'][1]], numpy.int)
 		nfdg = numpy.array(1, numpy.int)
-		
+
 		nfun = numpy.array([0], numpy.int)
 		ngrd = numpy.array([0], numpy.int)
-		
-		
+
+
 		# Run CONMIN
 		t0 = time.time()
 		conmin.conmin(ndv,ncn,xx,xl,xu,ff,gg,nn1,nn2,nn3,nn4,nn5,
 			iprint,iout,ifile,itmax,delfun,dabfun,itrm,nfeasct,
 			nfdg,nfun,ngrd,cnmnfun,cnmngrd)
 		sol_time = time.time() - t0
-		
+
 		if (myrank == 0):
 			if self.sto_hst:
 				log_file.close()
@@ -439,44 +441,44 @@ class CONMIN(Optimizer):
 					os.rename(name+'_tmp.cue',name+'.cue')
 					os.rename(name+'_tmp.bin',name+'.bin')
 				#end
-			#end		
+			#end
 		#end
-		
+
 		if (iprint > 0):
 			conmin.closeunit(self.options['IOUT'][1])
-		#end		
-		
-		
+		#end
+
+
 		# Store Results
 		sol_inform = {}
 		sol_inform['value'] = []	#ifail[0]
 		sol_inform['text'] = {}		#self.getInform(ifail[0])
-		
+
 		if store_sol:
-			
+
 			sol_name = 'CONMIN Solution to ' + opt_problem.name
-			
+
 			sol_options = copy.copy(self.options)
 			if sol_options.has_key('defaults'):
 				del sol_options['defaults']
 			#end
-			
+
 			sol_evals = nfun[0] + ngrd[0]*nvar
-			
+
 			sol_vars = copy.deepcopy(opt_problem._variables)
 			i = 0
 			for key in sol_vars.keys():
 				sol_vars[key].value = xx[i]
 				i += 1
 			#end
-			
+
 			sol_objs = copy.deepcopy(opt_problem._objectives)
 			i = 0
 			for key in sol_objs.keys():
 				sol_objs[key].value = ff[i]
 				i += 1
 			#end
-			
+
 			if ncon > 0:
 				sol_cons = copy.deepcopy(opt_problem._constraints)
 				i = 0
@@ -487,45 +489,45 @@ class CONMIN(Optimizer):
 			else:
 				sol_cons = {}
 			#end
-			
+
 			sol_lambda = {}
-			
-			
-			opt_problem.addSol(self.__class__.__name__, sol_name, objfunc, sol_time, 
-				sol_evals, sol_inform, sol_vars, sol_objs, sol_cons, sol_options, 
-				display_opts=disp_opts, Lambda=sol_lambda, Sensitivities=sens_type, 
+
+
+			opt_problem.addSol(self.__class__.__name__, sol_name, objfunc, sol_time,
+				sol_evals, sol_inform, sol_vars, sol_objs, sol_cons, sol_options,
+				display_opts=disp_opts, Lambda=sol_lambda, Sensitivities=sens_type,
 				myrank=myrank, arguments=args, **kwargs)
-			
+
 		#end
-		
+
 		return ff, xx, sol_inform #ifail[0]
-	
-	
-	
+
+
+
 	def _on_setOption(self, name, value):
-		
+
 		'''
 		Set Optimizer Option Value (Optimizer Specific Routine)
 		
 		Documentation last updated:  May. 07, 2008 - Ruben E. Perez
 		'''
-		
+
 		pass
-		
-		
+
+
 	def _on_getOption(self, name):
-		
+
 		'''
 		Get Optimizer Option Value (Optimizer Specific Routine)
 		
 		Documentation last updated:  May. 07, 2008 - Ruben E. Perez
 		'''
-		
+
 		pass
-		
-		
+
+
 	def _on_getInform(self, infocode):
-		
+
 		'''
 		Get Optimizer Result Information (Optimizer Specific Routine)
 		
@@ -535,33 +537,33 @@ class CONMIN(Optimizer):
 		
 		Documentation last updated:  May. 07, 2008 - Ruben E. Perez
 		'''
-		
+
 		pass
-		
-		
+
+
 	def _on_flushFiles(self):
-		
+
 		'''
 		Flush the Output Files (Optimizer Specific Routine)
 		
 		Documentation last updated:  August. 09, 2009 - Ruben E. Perez
 		'''
-		
-		# 
+
+		#
 		iPrint = self.options['IPRINT'][1]
 		if (iPrint > 0):
 			conmin.pyflush(self.options['IOUT'][1])
 		#end
-	
+
 
 
 #==============================================================================
 # CONMIN Optimizer Test
 #==============================================================================
 if __name__ == '__main__':
-	
+
 	# Test CONMIN
 	print 'Testing ...'
 	conmin = CONMIN()
 	print conmin
-	
+

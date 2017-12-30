@@ -1,4 +1,6 @@
 #!/usr/bin/env python
+# coding: utf-8
+
 '''
 pySDPEN - A Python pyOpt interface to SDPEN.
 
@@ -71,13 +73,13 @@ eps = 2.0*eps
 # SDPEN Optimizer Class
 # =============================================================================
 class SDPEN(Optimizer):
-	
+
 	'''
 	SDPEN Optimizer Class - Inherited from Optimizer Abstract Class
 	'''
-	
+
 	def __init__(self, pll_type=None, *args, **kwargs):
-		
+
 		'''
 		SDPEN Optimizer Class Initialization
 		
@@ -87,7 +89,7 @@ class SDPEN(Optimizer):
 		
 		Documentation last updated:  August. 09, 2012 - Ruben E. Perez
 		'''
-		
+
 		#
 		if (pll_type == None):
 			self.poa = False
@@ -96,7 +98,7 @@ class SDPEN(Optimizer):
 		else:
 			raise ValueError("pll_type must be either None or 'POA'")
 		#end
-		
+
 		#
 		name = 'SDPEN'
 		category = 'Local Optimizer'
@@ -113,10 +115,10 @@ class SDPEN(Optimizer):
 		2 : 'maximum number of evaluations reached',
 		}
 		Optimizer.__init__(self, name, category, def_opts, informs, *args, **kwargs)
-		
-		
+
+
 	def __solve__(self, opt_problem={}, store_sol=True, disp_opts=False, store_hst=False, hot_start=False, *args, **kwargs):
-		
+
 		'''
 		Run Optimizer (Optimize Routine)
 		
@@ -132,7 +134,7 @@ class SDPEN(Optimizer):
 		
 		Documentation last updated:  August. 09, 2012 - Ruben E. Perez
 		'''
-		
+
 		#
 		if self.poa:
 			try:
@@ -154,20 +156,20 @@ class SDPEN(Optimizer):
 			self.pll = False
 			self.myrank = 0
 		#end
-		
+
 		myrank = self.myrank
-		
-		# 
-		
+
+		#
+
 		def_fname = self.options['ifile'][1].split('.')[0]
 		hos_file, log_file, tmp_file = self._setHistory(opt_problem.name, store_hst, hot_start, def_fname)
-		
-		
+
+
 		#======================================================================
 		# SDPEN - Objective/Constraint Values Function
 		#======================================================================
 		def fobcon(n,m,x,f,g):
-			
+
 			# Variables Groups Handling
 			if opt_problem.use_groups:
 				xg = {}
@@ -182,10 +184,10 @@ class SDPEN(Optimizer):
 			else:
 				xn = x
 			#end
-			
+
 			# Flush Output Files
 			self.flushFiles()
-			
+
 			# Evaluate User Function (Real Valued)
 			fail = 0
 			ff = []
@@ -201,16 +203,16 @@ class SDPEN(Optimizer):
 					#end
 				#end
 			#end
-			
+
 			if self.pll:
 				self.h_start = Bcast(self.h_start,root=0)
 			#end
 			if self.h_start and self.pll:
 				[ff,gg,fail] = Bcast([ff,gg,fail],root=0)
-			elif not self.h_start:	
+			elif not self.h_start:
 				[ff,gg,fail] = opt_problem.obj_fun(xn, *args, **kwargs)
 			#end
-			
+
 			# Store History
 			if (myrank == 0):
 				if self.sto_hst:
@@ -220,14 +222,14 @@ class SDPEN(Optimizer):
 					log_file.write(fail,'fail')
 				#end
 			#end
-			
+
 			# Objective Assigment
 			if isinstance(ff,complex):
 				f = ff.astype(float)
 			else:
 				f = ff
 			#end
-			
+
 			# Constraints Assigment
 			for i in xrange(len(opt_problem._constraints.keys())):
 				if isinstance(g[i],complex):
@@ -236,11 +238,11 @@ class SDPEN(Optimizer):
 					g[i] = gg[i]
 				#end
 			#end
-			
+
 			return f,g
-		
-		
-		
+
+
+
 		# Variables Handling
 		nvar = len(opt_problem._variables.keys())
 		xl = []
@@ -260,8 +262,8 @@ class SDPEN(Optimizer):
 		xl = numpy.array(xl)
 		xu = numpy.array(xu)
 		xx = numpy.array(xx)
-		
-		# Variables Groups Handling 
+
+		# Variables Groups Handling
 		if opt_problem.use_groups:
 			group_ids = {}
 			k = 0
@@ -270,8 +272,8 @@ class SDPEN(Optimizer):
 				group_ids[opt_problem._vargroups[key]['name']] = [k,k+group_len]
 				k += group_len
 			#end
-		#end		
-		
+		#end
+
 		# Constraints Handling
 		ncon = len(opt_problem._constraints.keys())
 		#neqc = 0
@@ -290,7 +292,7 @@ class SDPEN(Optimizer):
 			gg.append(inf)
 		#end
 		gg = numpy.array(gg)
-		
+
 		# Objective Handling
 		objfunc = opt_problem.obj_fun
 		nobj = len(opt_problem._objectives.keys())
@@ -298,9 +300,9 @@ class SDPEN(Optimizer):
 		for key in opt_problem._objectives.keys():
 			ff.append(opt_problem._objectives[key].value)
 		#end
-		ff = numpy.array(ff)		
-		
-		
+		ff = numpy.array(ff)
+
+
 		# Setup argument list values
 		n = numpy.array([nvar], numpy.int)
 		m = numpy.array([ncon], numpy.int)
@@ -325,13 +327,13 @@ class SDPEN(Optimizer):
 		#end
 		istop = numpy.array([0], numpy.int)
 		nfvals = numpy.array([0], numpy.int)
-		
-		
+
+
 		# Run SDPEN
 		t0 = time.time()
 		sdpen.penseq(n,m,xx,xl,xu,ff,gg,alfa_stop,nf_max,iprint,iout,ifile,istop,nfvals,fobcon)
 		sol_time = time.time() - t0
-		
+
 		if (myrank == 0):
 			if self.sto_hst:
 				log_file.close()
@@ -343,44 +345,44 @@ class SDPEN(Optimizer):
 					os.rename(name+'_tmp.cue',name+'.cue')
 					os.rename(name+'_tmp.bin',name+'.bin')
 				#end
-			#end		
+			#end
 		#end
-		
+
 		if (iprint > 0):
 			sdpen.closeunit(self.options['iout'][1])
 		#end
-		
-		
+
+
 		# Store Results
 		sol_inform = {}
 		sol_inform['value'] = istop[0]
 		sol_inform['text'] = self.getInform(istop[0])
-		
+
 		if store_sol:
-			
+
 			sol_name = 'SDPEN Solution to ' + opt_problem.name
-			
+
 			sol_options = copy.copy(self.options)
 			if sol_options.has_key('defaults'):
 				del sol_options['defaults']
 			#end
-			
+
 			sol_evals = nfvals[0]
-			
+
 			sol_vars = copy.deepcopy(opt_problem._variables)
 			i = 0
 			for key in sol_vars.keys():
 				sol_vars[key].value = xx[i]
 				i += 1
 			#end
-			
+
 			sol_objs = copy.deepcopy(opt_problem._objectives)
 			i = 0
 			for key in sol_objs.keys():
 				sol_objs[key].value = ff[i]
 				i += 1
 			#end
-			
+
 			if ncon > 0:
 				sol_cons = copy.deepcopy(opt_problem._constraints)
 				i = 0
@@ -391,45 +393,45 @@ class SDPEN(Optimizer):
 			else:
 				sol_cons = {}
 			#end
-			
+
 			sol_lambda = {}
-			
-			
-			opt_problem.addSol(self.__class__.__name__, sol_name, objfunc, sol_time, 
-				sol_evals, sol_inform, sol_vars, sol_objs, sol_cons, sol_options, 
+
+
+			opt_problem.addSol(self.__class__.__name__, sol_name, objfunc, sol_time,
+				sol_evals, sol_inform, sol_vars, sol_objs, sol_cons, sol_options,
 				display_opts=disp_opts, Lambda=sol_lambda, myrank=myrank,
 				arguments=args, **kwargs)
-			
+
 		#end
-		
+
 		return ff, xx, sol_inform
-		
-		
-		
+
+
+
 	def _on_setOption(self, name, value):
-		
+
 		'''
 		Set Optimizer Option Value (Optimizer Specific Routine)
 		
 		Documentation last updated:  August. 09, 2012 - Ruben E. Perez
 		'''
-		
+
 		pass
-		
-		
+
+
 	def _on_getOption(self, name):
-		
+
 		'''
 		Get Optimizer Option Value (Optimizer Specific Routine)
 		
 		Documentation last updated:  August. 09, 2012 - Ruben E. Perez
 		'''
-		
+
 		pass
-		
-		
+
+
 	def _on_getInform(self, infocode):
-		
+
 		'''
 		Get Optimizer Result Information (Optimizer Specific Routine)
 		
@@ -439,33 +441,33 @@ class SDPEN(Optimizer):
 		
 		Documentation last updated:  August. 09, 2012 - Ruben E. Perez
 		'''
-		
+
 		return self.informs[infocode]
-		
-		
+
+
 	def _on_flushFiles(self):
-		
+
 		'''
 		Flush the Output Files (Optimizer Specific Routine)
 		
 		Documentation last updated:  August. 09, 2012 - Ruben E. Perez
 		'''
-		
-		# 
+
+		#
 		iprint = self.options['iprint'][1]
 		if (iprint >= 0):
-			sdpen.pyflush(self.options['iout'][1])	
+			sdpen.pyflush(self.options['iout'][1])
 		#end
-	
+
 
 
 #==============================================================================
 # SDPEN Optimizer Test
 #==============================================================================
 if __name__ == '__main__':
-	
+
 	# Test SDPEN
 	print 'Testing ...'
 	SDPEN = SDPEN()
 	print SDPEN
-	
+

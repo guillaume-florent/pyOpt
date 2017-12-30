@@ -1,4 +1,6 @@
 #!/usr/bin/env python
+# coding: utf-8
+
 '''
 pyOpt_optimizer
 
@@ -61,13 +63,13 @@ inf = 10.E+20  # define a value for infinity
 # Optimizer Class
 # =============================================================================
 class Optimizer(object):
-    
+
     '''
     Abstract Class for Optimizer Object
     '''
-    
+
     def __init__(self, name={}, category={}, def_options={}, informs={}, *args, **kwargs):
-        
+
         '''
         Optimizer Class Initialization
         
@@ -80,14 +82,14 @@ class Optimizer(object):
         
         Documentation last updated:  Feb. 03, 2011 - Peter W. Jansen
         '''
-        
-        # 
+
+        #
         self.name = name
         self.category = category
         self.options = {}
         self.options['defaults'] = def_options
         self.informs = informs
-        
+
         # Initialize Options
         def_keys = def_options.keys()
         for key in def_keys:
@@ -98,10 +100,10 @@ class Optimizer(object):
         for key in kopt_keys:
             self.setOption(key,koptions[key])
         #end
-        
-        
+
+
     def __solve__(self, opt_problem={}, *args, **kwargs):
-        
+
         '''
         Run Optimizer (Optimizer Specific Routine)
         
@@ -111,12 +113,12 @@ class Optimizer(object):
         
         Documentation last updated:  Feb. 03, 2011 - Peter W. Jansen
         '''
-        
+
         pass
-        
-        
+
+
     def __call__(self, opt_problem={}, *args, **kwargs):
-        
+
         '''
         Run Optimizer (Calling Routine)
         
@@ -128,7 +130,7 @@ class Optimizer(object):
         
         Documentation last updated:  Feb. 03, 2011 - Peter W. Jansen
         '''
-        
+
         # Check Optimization Problem
         if not isinstance(opt_problem,Optimization):
             try:
@@ -137,7 +139,7 @@ class Optimizer(object):
                 raise ValueError("Input is not a Valid Optimization Problem Instance\n")
             #end
         #end
-        
+
         # Check order of Constraints
         last_eq = 0
         first_ieq = -1
@@ -151,17 +153,17 @@ class Optimizer(object):
                     #end
                 #end
             #end
-            if (last_eq > first_ieq) and (first_ieq != -1):	
+            if (last_eq > first_ieq) and (first_ieq != -1):
                 print 'WARNING - Equality Constraints should be defined BEFORE Inequality Constraints'
             #end
         #end
-        
+
         # Solve Optimization Problem
         return self.__solve__(opt_problem, *args, **kwargs)
-        
-        
+
+
     def _on_setOption(self, name, value):
-        
+
         '''
         Set Optimizer Option Value (Optimizer Specific Routine)
         
@@ -172,12 +174,12 @@ class Optimizer(object):
         
         Documentation last updated:  Feb. 07, 2011 - Peter W. Jansen
         '''
-        
+
         raise NotImplementedError()
-        
-        
+
+
     def setOption(self, name, value=None):
-        
+
         '''
         Set Optimizer Option Value (Calling Routine)
         
@@ -191,8 +193,8 @@ class Optimizer(object):
         
         Documentation last updated:  Feb. 07, 2011 - Peter W. Jansen
         '''
-        
-        # 
+
+        #
         def_options = self.options['defaults']
         if def_options.has_key(name):
             if (type(value) == def_options[name][0]):
@@ -203,13 +205,13 @@ class Optimizer(object):
         else:
             raise IOError(repr(name) + ' is not a valid option name')
         #end
-        
-        # 
+
+        #
         self._on_setOption(name, value)
-        
-        
+
+
     def _on_getOption(self, name):
-        
+
         '''
         Get Optimizer Option Value (Optimizer Specific Routine)
         
@@ -219,12 +221,12 @@ class Optimizer(object):
         
         Documentation last updated:  Feb. 07, 2011 - Peter W. Jansen
         '''
-        
+
         raise NotImplementedError()
-        
-        
+
+
     def getOption(self, name):
-        
+
         '''
         Get Optimizer Option Value (Calling Routine)
         
@@ -234,21 +236,21 @@ class Optimizer(object):
         
         Documentation last updated:  Feb. 07, 2011 - Peter W. Jansen
         '''
-        
-        # 
+
+        #
         def_options = self.options['defaults']
         if def_options.has_key(name):
             return self.options[name][1]
-        else:	
+        else:
             raise IOError(repr(name) + ' is not a valid option name')
         #end
-        
-        # 
+
+        #
         self._on_getOption(name)
-        
-        
+
+
     def _on_getInform(self, info):
-        
+
         '''
         Get Optimizer Result Information (Optimizer Specific Routine)
         
@@ -258,12 +260,12 @@ class Optimizer(object):
         
         Documentation last updated:  Feb. 07, 2011 - Peter W. Jansen
         '''
-        
+
         raise NotImplementedError()
-        
-        
+
+
     def getInform(self, infocode=None):
-        
+
         '''
         Get Optimizer Result Information (Calling Routine)
         
@@ -273,39 +275,39 @@ class Optimizer(object):
         
         Documentation last updated:  Feb. 07, 2011 - Peter W. Jansen
         '''
-        
-        # 
+
+        #
         if (infocode == None):
             return self.informs
         else:
             return self._on_getInform(infocode)
         #end
-        
-        
+
+
     def _on_flushFiles(self):
-        
+
         '''
         Flush Output Files (Optimizer Specific Routine)
         
         Documentation last updated:  August. 09, 2009 - Ruben E. Perez
         '''
-        
+
         raise NotImplementedError()
-        
-        
+
+
     def flushFiles(self):
-        
+
         '''
         Flush Output Files (Calling Routine)
         
         Documentation last updated:  August. 09, 2009 - Ruben E. Perez
         '''
-        
-        self._on_flushFiles()       
-        
-        
+
+        self._on_flushFiles()
+
+
     def _setHistory(self, probname, store_hst, hot_start, def_fname):
-        
+
         '''
         Setup Optimizer History and/or Hot-start instances
         
@@ -318,10 +320,10 @@ class Optimizer(object):
         
         Documentation last updated:  Oct. 12, 2011 - Peter W. Jansen
         '''
-        
+
         #
         myrank = self.myrank
-        
+
         hos_file = None
         log_file = None
         tmp_file = False
@@ -385,37 +387,37 @@ class Optimizer(object):
                 self.sto_hst = False
             #end
         else:
-            
+
             self.sto_hst = False
             self.h_start = False
         #end
-        
+
         return hos_file, log_file, tmp_file
-    
-    
+
+
     def ListAttributes(self):
-        
+
         '''
         Print Structured Attributes List
         
         Documentation last updated:  March. 24, 2008 - Ruben E. Perez
         '''
-        
+
         ListAttributes(self)
-    
+
 
 
 #==============================================================================
-# 
+#
 #==============================================================================
 def ListAttributes(self):
-        
+
         '''
         Print Structured Attributes List
         
         Documentation last updated:  March. 24, 2008 - Ruben E. Perez
         '''
-        
+
         print '\n'
         print 'Attributes List of: ' + repr(self.__dict__['name']) + ' - ' + self.__class__.__name__ + ' Instance\n'
         self_keys = self.__dict__.keys()
@@ -426,16 +428,16 @@ def ListAttributes(self):
             #end
         #end
         print '\n'
-    
+
 
 
 #==============================================================================
 # Optimizer Test
 #==============================================================================
 if __name__ == '__main__':
-    
+
     # Test Optimizer
     print 'Testing Optimizer...'
     opt = Optimizer()
     opt.ListAttributes()
-    
+

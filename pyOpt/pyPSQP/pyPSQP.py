@@ -1,4 +1,6 @@
 #!/usr/bin/env python
+# coding: utf-8
+
 '''
 pyPSQP - A Python pyOpt interface to PSQP. 
 
@@ -74,13 +76,13 @@ eps = 2.0*eps
 # PSQP Optimizer Class
 # =============================================================================
 class PSQP(Optimizer):
-	
+
 	'''
 	PSQP Optimizer Class - Inherited from Optimizer Abstract Class
 	'''
-	
+
 	def __init__(self, pll_type=None, *args, **kwargs):
-		
+
 		'''
 		PSQP Optimizer Class Initialization
 		
@@ -90,7 +92,7 @@ class PSQP(Optimizer):
 		
 		Documentation last updated:  Feb. 16, 2010 - Peter W. Jansen
 		'''
-		
+
 		#
 		if (pll_type == None):
 			self.poa = False
@@ -99,7 +101,7 @@ class PSQP(Optimizer):
 		else:
 			raise ValueError("pll_type must be either None or 'POA'")
 		#end
-		
+
 		#
 		name = 'PSQP'
 		category = 'Local Optimizer'
@@ -112,7 +114,7 @@ class PSQP(Optimizer):
 		'MIT':[int,1000],  			# Maximum Number of Iterations
 		'MFV':[int,2000],  			# Maximum Number of Function Evaluations
 		'MET':[int,2],  			# Variable Metric Update (1 - BFGS, 2 - Hoshino)
-		'MEC':[int,2],  			# Negative Curvature Correction (1 - None, 2 - Powell's Correction)	
+		'MEC':[int,2],  			# Negative Curvature Correction (1 - None, 2 - Powell's Correction)
 		'IPRINT':[int,2],			# Output Level (0 - None, 1 - Final, 2 - Iter)
 		'IOUT':[int,6],     		# Output Unit Number
 		'IFILE':[str,'PSQP.out'],	# Output File Name
@@ -129,10 +131,10 @@ class PSQP(Optimizer):
 		#<0 : 'Method failed',
 		}
 		Optimizer.__init__(self, name, category, def_opts, informs, *args, **kwargs)
-		
-		
+
+
 	def __solve__(self, opt_problem={}, sens_type='FD', store_sol=True, store_hst=False, hot_start=False, disp_opts=False, sens_mode='', sens_step={}, *args, **kwargs):
-		
+
 		'''
 		Run Optimizer (Optimize Routine)
 		
@@ -151,12 +153,12 @@ class PSQP(Optimizer):
 		
 		Documentation last updated:  February. 2, 2011 - Ruben E. Perez
 		'''
-		
-		# 
+
+		#
 		if ((self.poa) and (sens_mode.lower() == 'pgc')):
 			raise NotImplementedError("pyPSQP - Current implementation only allows single level parallelization, either 'POA' or 'pgc'")
 		#end
-		
+
 		if self.poa or (sens_mode.lower() == 'pgc'):
 			try:
 				import mpi4py
@@ -177,22 +179,22 @@ class PSQP(Optimizer):
 			self.pll = False
 			self.myrank = 0
 		#end
-		
+
 		myrank = self.myrank
-		
-		# 
+
+		#
 		def_fname = self.options['IFILE'][1].split('.')[0]
 		hos_file, log_file, tmp_file = self._setHistory(opt_problem.name, store_hst, hot_start, def_fname)
-		
-		# 
+
+		#
 		gradient = Gradient(opt_problem, sens_type, sens_mode, sens_step, *args, **kwargs)
-		
-		
+
+
 		#======================================================================
-		# PSQP - Objective/Constraint Values Storage 
+		# PSQP - Objective/Constraint Values Storage
 		#======================================================================
 		def eval(x):
-			
+
 			# Variables Groups Handling
 			if opt_problem.use_groups:
 				xg = {}
@@ -207,10 +209,10 @@ class PSQP(Optimizer):
 			else:
 				xn = x
 			#end
-			
+
 			# Flush Output Files
 			self.flushFiles()
-			
+
 			# Evaluate User Function (Real Valued)
 			fail = 0
 			f = []
@@ -226,16 +228,16 @@ class PSQP(Optimizer):
 					#end
 				#end
 			#end
-			
+
 			if self.pll:
 				self.h_start = Bcast(self.h_start,root=0)
 			#end
 			if self.h_start and self.pll:
 				[f,g,fail] = Bcast([f,g,fail],root=0)
-			elif not self.h_start:	
+			elif not self.h_start:
 				[f,g,fail] = opt_problem.obj_fun(xn, *args, **kwargs)
 			#end
-			
+
 			# Store History
 			if (myrank == 0):
 				if self.sto_hst:
@@ -245,7 +247,7 @@ class PSQP(Optimizer):
 					log_file.write(fail,'fail')
 				#end
 			#end
-			
+
 			# Objective Assigment
 			if isinstance(f,float):
 				f = [f]
@@ -257,7 +259,7 @@ class PSQP(Optimizer):
 					ff[i] = f[i]
 				#end
 			#end
-			
+
 			# Constraints Assigment
 			i = 0
 			for j in xrange(len(opt_problem._constraints.keys())):
@@ -268,7 +270,7 @@ class PSQP(Optimizer):
 				#end
 				i += 1
 			#end
-			
+
 			# Gradients
 			if self.h_start:
 				dff = []
@@ -280,7 +282,7 @@ class PSQP(Optimizer):
 						hos_file.close()
 					else:
 						dff = vals['grad_obj'][0].reshape((len(opt_problem._objectives.keys()),len(opt_problem._variables.keys())))
-						dgg = vals['grad_con'][0].reshape((len(opt_problem._constraints.keys()),len(opt_problem._variables.keys())))	
+						dgg = vals['grad_con'][0].reshape((len(opt_problem._constraints.keys()),len(opt_problem._variables.keys())))
 					#end
 				#end
 				if self.pll:
@@ -290,87 +292,87 @@ class PSQP(Optimizer):
 					[dff,dgg] = Bcast([dff,dgg],root=0)
 				#end
 			#end
-			
+
 			if not self.h_start:
-				
-				# 
+
+				#
 				dff,dgg = gradient.getGrad(x, group_ids, f, g, *args, **kwargs)
-				
+
 			#end
-			
+
 			# Store History
 			if self.sto_hst and (myrank == 0):
 				log_file.write(dff,'grad_obj')
 				log_file.write(dgg,'grad_con')
 			#end
-			
+
 			# Store
 			self.stored_data['x'] = copy.copy(x)
 			self.stored_data['f'] = copy.copy(ff)
 			self.stored_data['g'] = copy.copy(gg)
 			self.stored_data['df'] = copy.copy(dff)
-			self.stored_data['dg'] = copy.copy(dgg)			
-			
+			self.stored_data['dg'] = copy.copy(dgg)
+
 			return
-		
-		
+
+
 		#======================================================================
 		# PSQP - Objective Values Function
 		#======================================================================
 		def pobj(n,x,f):
-			
+
 			if ((self.stored_data['x'] != x).any()):
 				eval(x)
 			#end
-			
+
 			ff = self.stored_data['f']
-			
+
 			return ff[0]
-		
-		
+
+
 		#======================================================================
 		# PSQP - Constraint Values Function
 		#======================================================================
 		def pcon(n,k,x,g):
-			
+
 			if ((self.stored_data['x'] != x).any()):
 				eval(x)
 			#end
-			
+
 			gg = self.stored_data['g']
-			
+
 			return gg[k-1]
-		
-		
+
+
 		#======================================================================
 		# PSQP - Objective Gradients Function
 		#======================================================================
 		def pdobj(n,x,df):
-			
+
 			if ((self.stored_data['x'] != x).any()):
 				eval(x)
 			#end
-			
+
 			df = self.stored_data['df']
-			
+
 			return df[0]
-		
-		
+
+
 		#======================================================================
 		# PSQP - Constraint Gradients Function
 		#======================================================================
 		def pdcon(n,k,x,dg):
-			
+
 			if ((self.stored_data['x'] != x).any()):
 				eval(x)
 			#end
-			
+
 			dg = self.stored_data['dg']
-			
+
 			return dg[k-1]
-		
-		
-		
+
+
+
 		# Variables Handling
 		nvar = len(opt_problem._variables.keys())
 		xl = []
@@ -387,7 +389,7 @@ class PSQP(Optimizer):
 		xu = numpy.array(xu)
 		xi = numpy.array(xi)
 		xx = numpy.array(xx)
-		
+
 		# Variables Groups Handling
 		group_ids = {}
 		if opt_problem.use_groups:
@@ -398,7 +400,7 @@ class PSQP(Optimizer):
 				k += group_len
 			#end
 		#end
-		
+
 		# Constraints Handling
 		ncon = len(opt_problem._constraints.keys())
 		if ncon > 0:
@@ -423,7 +425,7 @@ class PSQP(Optimizer):
 			gi = numpy.array([0], numpy.float)
 			gg = numpy.array([0], numpy.float)
 		#end
-		
+
 		# Objective Handling
 		objfunc = opt_problem.obj_fun
 		nobj = len(opt_problem._objectives.keys())
@@ -432,8 +434,8 @@ class PSQP(Optimizer):
 			ff.append(opt_problem._objectives[key].value)
 		#end
 		ff = numpy.array(ff, numpy.float)
-		
-		
+
+
 		# Setup argument list values
 		nf = numpy.array([nvar], numpy.int)
 		nc = numpy.array([ncon], numpy.int)
@@ -446,7 +448,7 @@ class PSQP(Optimizer):
 		tolc = numpy.array([self.options['TOLC'][1]], numpy.float)
 		tolg = numpy.array([self.options['TOLG'][1]], numpy.float)
 		rpf = numpy.array([self.options['RPF'][1]], numpy.float)
-		gmax = numpy.array([0], numpy.float)		
+		gmax = numpy.array([0], numpy.float)
 		cmax = numpy.array([0], numpy.float)
 		if (myrank == 0):
 			if (self.options['IPRINT'][1] <= 2):
@@ -467,24 +469,24 @@ class PSQP(Optimizer):
 			#end
 		#end
 		iterm = numpy.array([0], numpy.int)
-		
-		
-		# Storage Arrays 
+
+
+		# Storage Arrays
 		self.stored_data = {}
 		self.stored_data['x'] = {}  #numpy.zeros([nvar],float)
 		self.stored_data['f'] = {}  #numpy.zeros([nobj],float)
 		self.stored_data['g'] = {}  #numpy.zeros([ncon],float)
 		self.stored_data['df'] = {} #numpy.zeros([nvar],float)
-		self.stored_data['dg'] = {} #numpy.zeros([ncon,nvar],float) 
-		
-		
+		self.stored_data['dg'] = {} #numpy.zeros([ncon,nvar],float)
+
+
 		# Run PSQP
 		t0 = time.time()
 		psqp.psqp_wrap(nf,nc,xx,xi,xl,xu,gg,gi,gl,gu,mit,mfv,
 			met,mec,xmax,tolx,tolc,tolg,rpf,ff,gmax,cmax,
 			iprint,iout,ifile,iterm,pobj,pdobj,pcon,pdcon)
 		sol_time = time.time() - t0
-		
+
 		if (myrank == 0):
 			if self.sto_hst:
 				log_file.close()
@@ -498,38 +500,38 @@ class PSQP(Optimizer):
 				#end
 			#end
 		#end
-		
-		
+
+
 		# Store Results
 		sol_inform = {}
 		sol_inform['value'] = iterm[0]
 		sol_inform['text'] = self.getInform(iterm[0])
-		
+
 		if store_sol:
-			
+
 			sol_name = 'PSQP Solution to ' + opt_problem.name
-			
+
 			sol_options = copy.copy(self.options)
 			if sol_options.has_key('defaults'):
 				del sol_options['defaults']
 			#end
-			
+
 			sol_evals = psqp.stat.nfv + psqp.stat.nfg*nvar
-			
+
 			sol_vars = copy.deepcopy(opt_problem._variables)
 			i = 0
 			for key in sol_vars.keys():
 				sol_vars[key].value = xx[i]
 				i += 1
 			#end
-			
+
 			sol_objs = copy.deepcopy(opt_problem._objectives)
 			i = 0
 			for key in sol_objs.keys():
 				sol_objs[key].value = ff[i]
 				i += 1
 			#end
-			
+
 			if ncon > 0:
 				sol_cons = copy.deepcopy(opt_problem._constraints)
 				i = 0
@@ -540,45 +542,45 @@ class PSQP(Optimizer):
 			else:
 				sol_cons = {}
 			#end
-			
+
 			sol_lambda = {}
-			
-			
-			opt_problem.addSol(self.__class__.__name__, sol_name, objfunc, sol_time, 
-				sol_evals, sol_inform, sol_vars, sol_objs, sol_cons, sol_options, 
-				display_opts=disp_opts, Lambda=sol_lambda, Sensitivities=sens_type, 
+
+
+			opt_problem.addSol(self.__class__.__name__, sol_name, objfunc, sol_time,
+				sol_evals, sol_inform, sol_vars, sol_objs, sol_cons, sol_options,
+				display_opts=disp_opts, Lambda=sol_lambda, Sensitivities=sens_type,
 				myrank=myrank, arguments=args, **kwargs)
-			
+
 		#end
-		
+
 		return ff, xx, sol_inform
-		
-		
-		
+
+
+
 	def _on_setOption(self, name, value):
-		
+
 		'''
 		Set Optimizer Option Value (Optimizer Specific Routine)
 		
 		Documentation last updated:  November. 30, 2010 - Ruben E. Perez
 		'''
-		
+
 		pass
-		
-		
+
+
 	def _on_getOption(self, name):
-		
+
 		'''
 		Get Optimizer Option Value (Optimizer Specific Routine)
 		
 		Documentation last updated:  November. 30, 2010 - Ruben E. Perez
 		'''
-		
+
 		pass
-		
-		
+
+
 	def _on_getInform(self, infocode):
-		
+
 		'''
 		Get Optimizer Result Information (Optimizer Specific Routine)
 		
@@ -588,33 +590,33 @@ class PSQP(Optimizer):
 		
 		Documentation last updated:  November. 30, 2010 - Ruben E. Perez
 		'''
-		
+
 		return self.informs[infocode]
-		
-		
+
+
 	def _on_flushFiles(self):
-		
+
 		'''
 		Flush the Output Files (Optimizer Specific Routine)
 		
 		Documentation last updated:  November. 30, 2010 - Ruben E. Perez
 		'''
-		
-		# 
+
+		#
 		iprint = self.options['IPRINT'][1]
 		if (iprint > 0):
-			psqp.pyflush(self.options['IOUT'][1])	
+			psqp.pyflush(self.options['IOUT'][1])
 		#end
-	
+
 
 
 #==============================================================================
 # PSQP Optimizer Test
 #==============================================================================
 if __name__ == '__main__':
-	
+
 	# Test PSQP
 	print 'Testing ...'
 	psqp = PSQP()
 	print psqp
-	
+

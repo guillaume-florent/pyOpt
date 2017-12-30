@@ -1,4 +1,6 @@
 #!/usr/bin/env python
+# coding: utf-8
+
 '''
 pyMIDACO - A Python pyOpt interface to MIDACO. 
 
@@ -75,13 +77,13 @@ eps = 2.0*eps
 # MIDACO Optimizer Class
 # =============================================================================
 class MIDACO(Optimizer):
-	
+
 	'''
 	MIDACO Optimizer Class - Inherited from Optimizer Abstract Class
 	'''
-	
+
 	def __init__(self, pll_type=None, *args, **kwargs):
-		
+
 		'''
 		MIDACO Optimizer Class Initialization
 		
@@ -91,7 +93,7 @@ class MIDACO(Optimizer):
 		
 		Documentation last updated:  Feb. 16, 2010 - Peter W. Jansen
 		'''
-		
+
 		#
 		if (pll_type == None):
 			self.poa = False
@@ -105,7 +107,7 @@ class MIDACO(Optimizer):
 		else:
 			raise ValueError("pll_type must be either None, 'POA' or 'SPM'")
 		#end
-		
+
 		#
 		name = 'MIDACO'
 		category = 'Global Optimizer'
@@ -183,10 +185,10 @@ class MIDACO(Optimizer):
 		999 : 'ERROR: N > 4. The free test version is limited up to 4 variables',
 		}
 		Optimizer.__init__(self, name, category, def_opts, informs, *args, **kwargs)
-		
-		
+
+
 	def __solve__(self, opt_problem={}, store_sol=True, disp_opts=False, store_hst=False, hot_start=False, *args, **kwargs):
-		
+
 		'''
 		Run Optimizer (Optimize Routine)
 		
@@ -234,23 +236,23 @@ class MIDACO(Optimizer):
 			nproc = 1
 			self.myrank = 0
 		#end
-		
+
 		myrank = self.myrank
-		
-		# 
+
+		#
 		def_fname = self.options['IFILE1'][1].split('.')[0]
 		hos_file, log_file, tmp_file = self._setHistory(opt_problem.name, store_hst, hot_start, def_fname)
-		
-		
+
+
 		#======================================================================
 		# MIDACO - Objective/Constraint Values Function
 		#======================================================================
 		def objfun(l,n,m,x,f,g):
-			
+
 			x = numpy.reshape(x,(l,-1))
 			f = numpy.reshape(f,(l,-1))
 			g = numpy.reshape(g,(l,-1))
-			
+
 			# Variables Groups Handling
 			if not self.poa:
 				mxi = myrank
@@ -270,7 +272,7 @@ class MIDACO(Optimizer):
 			else:
 				xn = x[mxi,:]
 			#end
-			
+
 			# Evaluate User Function
 			fail = 0
 			ff = []
@@ -290,16 +292,16 @@ class MIDACO(Optimizer):
 					#end
 				#end
 			#end
-				
+
 			if self.pll:
 				self.h_start = Bcast(self.h_start,root=0)
 			#end
 			if self.h_start and self.pll:
 				[f,g] = Bcast([f,g],root=0)
-			elif not self.h_start:	
+			elif not self.h_start:
 				[ff,gg,fail] = opt_problem.obj_fun(xn, *args, **kwargs)
-				
-				# 
+
+				#
 				if (fail == 1):
 					# Objective Assigment
 					f[mxi] = inf
@@ -323,7 +325,7 @@ class MIDACO(Optimizer):
 						#end
 					#end
 				#end
-				
+
 				if self.spm:
 					send_buf = {}
 					send_buf[myrank] = {'fi':f[mxi],'gi':g[mxi]}
@@ -335,7 +337,7 @@ class MIDACO(Optimizer):
 							p_results.append(Recv(source=proc))
 						#end
 					#end
-					
+
 					if myrank == 0:
 						for proc in xrange(nproc-1):
 							for i in p_results[proc].keys():
@@ -344,11 +346,11 @@ class MIDACO(Optimizer):
 							#end
 						#end
 					#end
-					
+
 					[f,g] = Bcast([f,g],root=0)
 				#end
 			#end
-			
+
 			# Store History
 			if (myrank == 0):
 				if self.sto_hst:
@@ -360,14 +362,14 @@ class MIDACO(Optimizer):
 					#end
 				#end
 			#end
-			
+
 			f = numpy.reshape(f,l)
 			g = numpy.reshape(g,l*m)
-			
+
 			return f,g
-		
-		
-		
+
+
+
 		# Variables Handling
 		nvar = len(opt_problem._variables.keys())
 		nint = 0
@@ -385,8 +387,8 @@ class MIDACO(Optimizer):
 		xl = numpy.array(xl)
 		xu = numpy.array(xu)
 		xx = numpy.array(xx*nproc)
-		
-		# Variables Groups Handling 
+
+		# Variables Groups Handling
 		if opt_problem.use_groups:
 			group_ids = {}
 			k = 0
@@ -395,8 +397,8 @@ class MIDACO(Optimizer):
 				group_ids[opt_problem._vargroups[key]['name']] = [k,k+group_len]
 				k += group_len
 			#end
-		#end		
-		
+		#end
+
 		# Constraints Handling
 		ncon = len(opt_problem._constraints.keys())
 		neqc = 0
@@ -413,18 +415,18 @@ class MIDACO(Optimizer):
 			gg.append(0.0)
 		#end
 		gg = numpy.array(gg*nproc)
-		
+
 		# Objective Handling
 		objfunc = opt_problem.obj_fun
 		nobj = len(opt_problem._objectives.keys())
-		
+
 		ff = []
 		for key in opt_problem._objectives.keys():
 			ff.append(opt_problem._objectives[key].value)
 		#end
 		ff = numpy.array(ff*nproc)
-		
-		
+
+
 		# Setup argument list values
 		ll = numpy.array([nproc], numpy.int)
 		nn = numpy.array([nvar], numpy.int)
@@ -475,13 +477,13 @@ class MIDACO(Optimizer):
 		lrw0 = 200*nn + 2*mm + 1000
 		lrw = numpy.array([lrw0], numpy.int)
 		rw = numpy.zeros([lrw], numpy.float)
-		
-		
+
+
 		# Run MIDACO
 		t0 = time.time()
 		midaco.midaco_wrap(ll,nn,ni,mm,me,xx,xl,xu,ff,gg,param,maxeval,maxtime,ifail,neval,iprint,printeval,iout1,iout2,ifile1,ifile2,lkey,liw,iw,lrw,rw,objfun)
 		sol_time = time.time() - t0
-		
+
 		if (myrank == 0):
 			if self.sto_hst:
 				log_file.close()
@@ -495,43 +497,43 @@ class MIDACO(Optimizer):
 				#end
 			#end
 		#end
-		
+
 		if (iprint > 0):
 			midaco.closeunit(self.options['IOUT1'][1])
 			midaco.closeunit(self.options['IOUT2'][1])
 		#end
-		
-		
+
+
 		# Store Results
 		if store_sol:
-			
+
 			sol_name = 'MIDACO Solution to ' + opt_problem.name
-			
+
 			sol_options = copy.copy(self.options)
 			if sol_options.has_key('defaults'):
 				del sol_options['defaults']
 			#end
-			
+
 			sol_inform = {}
 			sol_inform['value'] = ifail[0]
 			sol_inform['text'] = self.getInform(ifail[0])
-			
+
 			sol_evals = neval
-			
+
 			sol_vars = copy.deepcopy(opt_problem._variables)
 			i = 0
 			for key in sol_vars.keys():
 				sol_vars[key].value = xx[i]
 				i += 1
 			#end
-			
+
 			sol_objs = copy.deepcopy(opt_problem._objectives)
 			i = 0
 			for key in sol_objs.keys():
 				sol_objs[key].value = ff[i]
 				i += 1
 			#end
-			
+
 			if ncon > 0:
 				sol_cons = copy.deepcopy(opt_problem._constraints)
 				i = 0
@@ -545,45 +547,45 @@ class MIDACO(Optimizer):
 			else:
 				sol_cons = {}
 			#end
-			
+
 			sol_lambda = {}
-			
-			
-			opt_problem.addSol(self.__class__.__name__, sol_name, objfunc, sol_time, 
-				sol_evals, sol_inform, sol_vars, sol_objs, sol_cons, sol_options, 
-				display_opts=disp_opts, Lambda=sol_lambda, 
+
+
+			opt_problem.addSol(self.__class__.__name__, sol_name, objfunc, sol_time,
+				sol_evals, sol_inform, sol_vars, sol_objs, sol_cons, sol_options,
+				display_opts=disp_opts, Lambda=sol_lambda,
 				myrank=myrank, arguments=args, **kwargs)
-			
+
 		#end
-		
+
 		return ff, xx, sol_inform
-		
-		
-		
+
+
+
 	def _on_setOption(self, name, value):
-		
+
 		'''
 		Set Optimizer Option Value (Optimizer Specific Routine)
 		
 		Documentation last updated:  May. 07, 2008 - Ruben E. Perez
 		'''
-		
+
 		pass
-		
-		
+
+
 	def _on_getOption(self, name):
-		
+
 		'''
 		Get Optimizer Option Value (Optimizer Specific Routine)
 		
 		Documentation last updated:  May. 07, 2008 - Ruben E. Perez
 		'''
-		
+
 		pass
-		
-		
+
+
 	def _on_getInform(self, infocode):
-		
+
 		'''
 		Get Optimizer Result Information (Optimizer Specific Routine)
 		
@@ -593,34 +595,34 @@ class MIDACO(Optimizer):
 		
 		Documentation last updated:  May. 07, 2008 - Ruben E. Perez
 		'''
-		
+
 		return self.informs[infocode]
-		
-		
+
+
 	def _on_flushFiles(self):
-		
+
 		'''
 		Flush the Output Files (Optimizer Specific Routine)
 		
 		Documentation last updated:  August. 09, 2009 - Ruben E. Perez
 		'''
-		
-		# 
+
+		#
 		iprint = self.options['IPRINT'][1]
 		if (iprint > 0):
 			midaco.pyflush(self.options['IOUT1'][1])
 			midaco.pyflush(self.options['IOUT2'][1])
 		#end
-	
+
 
 
 #==============================================================================
 # MIDACO Optimizer Test
 #==============================================================================
 if __name__ == '__main__':
-	
+
 	# Test MIDACO
 	print 'Testing ...'
 	midaco = MIDACO()
 	print midaco
-	
+

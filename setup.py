@@ -1,9 +1,10 @@
 #!/usr/bin/env python
+# coding: utf-8
 
 import os,sys
 from numpy.distutils.command.build_ext import build_ext
 
-if os.path.exists('MANIFEST'): 
+if os.path.exists('MANIFEST'):
     os.remove('MANIFEST')
 #end
 
@@ -12,7 +13,7 @@ if sys.version_info[:2] < (2, 4):
     sys.exit(-1)
 #end
 
-try:                  
+try:
     import numpy
     if int(numpy.__version__.split('.')[0]) < 1:
         print('pyOpt requires NumPy version 1.0 or later (%s detected).' %numpy.__version__)
@@ -73,19 +74,19 @@ class build_opt(build_ext):
 
 
 def configuration(parent_package='',top_path=None):
-    
+
     from numpy.distutils.misc_util import Configuration
-    
+
     config = Configuration(None,parent_package,top_path)
     config.set_options(ignore_setup_xxx_py=True,
                        assume_default_configuration=True,
                        delegate_options_to_subpackages=True,
                        quiet=True)
-    
+
     config.add_subpackage('pyOpt')
-    
+
     return config
-    
+
 
 if __name__ == '__main__':
     from numpy.distutils.core import setup
@@ -121,4 +122,4 @@ if __name__ == '__main__':
         cmdclass = {"build_ext": build_opt},
         #**configuration().todict()
     )
-    
+

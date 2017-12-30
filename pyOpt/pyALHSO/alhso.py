@@ -1,4 +1,6 @@
 #!/usr/bin/env python
+# coding: utf-8
+
 '''
 alhso - Python Version of the Augmented Lagrangian Harmony Search Optimizer
 
@@ -77,30 +79,30 @@ def alhso(dimensions,constraints,neqcons,xtype,x0,xmin,xmax,
 	memsize,maxoutiter,maxinniter,stopcriteria,stopiters,etol,
 	itol,atol,rtol,prtoutiter,prtinniter,r0,hmcr,par,bw,
 	fileout,filename,rseed,scale,objfunc):
-	
+
 	'''
 	Python Version of the Augmented Lagrangian Harmony Search Optimizer
 	
 	Documentation last updated:  February. 19, 2009 - Ruben E. Perez
 	'''
-	
+
 	# Set random number seed
 	rand = random.Random()
-	if rseed == {}:	
+	if rseed == {}:
 		rseed = time.time()
 	#end
-	
+
 	rand.seed(rseed)
-	
-	# 
+
+	#
 	if (fileout == 1):
 		if (filename == ''):
 			filename = 'Print.out'
 		#end
 		ofile = open(filename,'w')
 	#end
-	
-	# 
+
+	#
 	if (scale == 1):
 		dbw = (xmax - xmin)/bw
 		space_centre = numpy.zeros(dimensions,float)
@@ -113,12 +115,12 @@ def alhso(dimensions,constraints,neqcons,xtype,x0,xmin,xmax,
 		xmax =  numpy.ones(dimensions,float)
 		bw = (xmax - xmin)/dbw
 	#end
-	
+
 	# Initialize Augmented Lagrange
 	rp_val = numpy.ones(constraints, float)*r0
 	lambda_val = numpy.zeros(constraints, float)
 	lambda_old = numpy.zeros(constraints, float)
-	
+
 	# Initialize Harmony Memory
 	HM = numpy.zeros((memsize,dimensions+1), float)
 	discrete_i = []
@@ -137,7 +139,7 @@ def alhso(dimensions,constraints,neqcons,xtype,x0,xmin,xmax,
 			HM[:,:-1] = x0[:]
 		#end
 	#end
-	
+
 	# Initialize Harmony Memory Augmented Lagrange
 	x_val = numpy.zeros(dimensions, float)
 	x_tmp = numpy.zeros(dimensions, float)
@@ -145,7 +147,7 @@ def alhso(dimensions,constraints,neqcons,xtype,x0,xmin,xmax,
 	nfevals = 0
 	#best_L_val = 0
 	for i in xrange(memsize):
-		
+
 		# Evaluate Ojective Function
 		if (scale == 1):
 			x_tmp = (HM[i,:-1] * space_halflen) + space_centre
@@ -157,16 +159,16 @@ def alhso(dimensions,constraints,neqcons,xtype,x0,xmin,xmax,
 		#end
 		[f_val,g_val] = objfunc(x_tmp)
 		nfevals += 1
-		
+
 		# Augmented Lagrangian Value
 		L_val = f_val
 		if (constraints > 0):
-			
+
 			# Equality Constraints
 			for l in xrange(neqcons):
 				tau_val[l] = g_val[l]
 			#end
-			
+
 			# Inequality Constraints
 			for l in xrange(neqcons,constraints):
 				if (rp_val[l] != 0):
@@ -179,52 +181,52 @@ def alhso(dimensions,constraints,neqcons,xtype,x0,xmin,xmax,
 					tau_val[l] = g_val[l]
 				#end
 			#end
-			
+
 			#
 			for l in xrange(constraints):
 				L_val += lambda_val[l]*tau_val[l] + rp_val[l]*tau_val[l]**2
 			#end
-			
+
 		#end
-		
-		# 
+
+		#
 		HM[i,dimensions] = L_val
-		
+
 	#end
-	
+
 	# Initialize Best
 	best_x_val = numpy.zeros(dimensions, float)
 	best_f_val = []
 	best_g_val = numpy.zeros(constraints, float)
-	
+
 	best_x_old = numpy.zeros(dimensions, float)
 	best_f_old = []
 	best_g_old = numpy.zeros(constraints, float)
-	
-	
+
+
 	# Outer Optimization Loop
 	k_out = 0
 	kobj = 0
 	iobj = 0
 	stop_main_flag = 0
 	while ((k_out < maxoutiter) and (stop_main_flag == 0)):
-		
+
 		k_out += 1
-		
+
 		# Inner Optimization Loop
 		k_inn = 0
 		while (k_inn < maxinniter):
-			
+
 			k_inn += 1
-			
+
 			# New Harmony Improvisation
 			for j in xrange(dimensions):
-				
+
 				if ((rand.random() < hmcr) or (x0 != [] and k_out == 1)):
-					
+
 					# Harmony Memory Considering
 					x_val[j] = HM[int(memsize*rand.random()),j]
-					
+
 					# Pitch Adjusting
 					if (rand.random() <= par):
 						if (rand.random() > 0.5):
@@ -233,24 +235,24 @@ def alhso(dimensions,constraints,neqcons,xtype,x0,xmin,xmax,
 							x_val[j] -= rand.random()*bw[j]
 						#end
 					#end
-					
+
 				else:
-					
+
 					# Random Searching
 					x_val[j] = xmin[j] + rand.random()*(xmax[j]-xmin[j])
-					
+
 				#end
-				
+
 				# Check for improvisations out of range
-				if (x_val[j] > xmax[j]): 
+				if (x_val[j] > xmax[j]):
 					x_val[j] = xmax[j]
 				elif (x_val[j] < xmin[j]):
 					x_val[j] = xmin[j]
 				#end
-				
+
 			#end
-			
-			# Evaluate 
+
+			# Evaluate
 			if (scale == 1):
 				x_tmp = (x_val * space_halflen) + space_centre
 			else:
@@ -261,16 +263,16 @@ def alhso(dimensions,constraints,neqcons,xtype,x0,xmin,xmax,
 			#end
 			[f_val,g_val] = objfunc(x_tmp)
 			nfevals += 1
-			
+
 			# Lagrangian Value
 			L_val = f_val
 			if (constraints > 0):
-				
+
 				# Equality Constraints
 				for l in xrange(neqcons):
 					tau_val[l] = g_val[l]
 				#end
-				
+
 				# Inequality Constraints
 				for l in xrange(neqcons,constraints):
 					if (rp_val[l] != 0):
@@ -283,15 +285,15 @@ def alhso(dimensions,constraints,neqcons,xtype,x0,xmin,xmax,
 						tau_val[l] = g_val[l]
 					#end
 				#end
-				
-				# 
+
+				#
 				for l in xrange(constraints):
 					L_val += lambda_val[l]*tau_val[l] + rp_val[l]*tau_val[l]**2
 				#end
-				
+
 			#end
-			
-			# 
+
+			#
 			feasible = True
 			if (constraints > 0):
 				for l in xrange(constraints):
@@ -308,10 +310,10 @@ def alhso(dimensions,constraints,neqcons,xtype,x0,xmin,xmax,
 					#end
 				#end
 			#end
-			
-			# 
+
+			#
 			if (feasible or (k_out == 1 and x0 != [])):
-				
+
 				# Harmony Memory Update
 				hmax_num = 0
 				hmax = HM[0,dimensions]
@@ -321,14 +323,14 @@ def alhso(dimensions,constraints,neqcons,xtype,x0,xmin,xmax,
 						hmax = HM[i,dimensions]
 					#end
 				#end
-				
+
 				if (L_val < hmax):
 					for j in xrange(dimensions):
 						HM[hmax_num,j] = x_val[j]
 					#end
 					HM[hmax_num,dimensions] = L_val
 				#end
-				
+
 				hmin_num = 0
 				hmin = HM[0,dimensions]
 				for i in xrange(memsize):
@@ -337,19 +339,19 @@ def alhso(dimensions,constraints,neqcons,xtype,x0,xmin,xmax,
 						hmin = HM[i,dimensions]
 					#end
 				#end
-				
+
 				if (L_val == hmin):
-					
+
 					best_x_val = x_val
 					best_f_val = f_val
 					best_g_val = g_val
-					
+
 					# Print Inner
 					if (prtinniter != 0):
 						# output to screen
 						print '%d Inner Iteration of %d Outer Iteration' %(k_inn,k_out)
 						print L_val
-						
+
 						if (scale == 1):
 							x_tmp = (x_val * space_halflen) + space_centre
 						else:
@@ -359,7 +361,7 @@ def alhso(dimensions,constraints,neqcons,xtype,x0,xmin,xmax,
 							x_tmp[m] = floor(x_tmp[m] + 0.5)
 						#end
 						print x_tmp
-						
+
 						print f_val
 						print g_val
 						print nfevals
@@ -368,18 +370,18 @@ def alhso(dimensions,constraints,neqcons,xtype,x0,xmin,xmax,
 						# output to filename
 						pass
 					#end
-					
+
 					break
-					
+
 				#end
-				
+
 			#end
-			
+
 		#end
-		
-		# 
+
+		#
 		if (best_f_val == [] and k_out == 1 and x0 == []):
-			
+
 			# Re-Initialize Harmony Memory
 			HM = numpy.zeros((memsize,dimensions+1), float)
 			for i in xrange(memsize):
@@ -387,10 +389,10 @@ def alhso(dimensions,constraints,neqcons,xtype,x0,xmin,xmax,
 					HM[i,j] = xmin[j] + rand.random()*(xmax[j]-xmin[j])
 				#end
 			#end
-			
+
 			# Re-Initialize Harmony Memory Augmented Lagrange
 			for i in xrange(memsize):
-				
+
 				# Evaluate Ojective Function
 				if (scale == 1):
 					x_tmp = (HM[i,:-1] * space_halflen) + space_centre
@@ -402,16 +404,16 @@ def alhso(dimensions,constraints,neqcons,xtype,x0,xmin,xmax,
 				#end
 				[f_val,g_val] = objfunc(x_tmp)
 				nfevals += 1
-				
+
 				# Augmented Lagrangian Value
 				L_val = f_val
 				if (constraints > 0):
-					
+
 					# Equality Constraints
 					for l in xrange(neqcons):
 						tau_val[l] = g_val[l]
 					#end
-					
+
 					# Inequality Constraints
 					for l in xrange(neqcons,constraints):
 						if (rp_val[l] != 0):
@@ -424,29 +426,29 @@ def alhso(dimensions,constraints,neqcons,xtype,x0,xmin,xmax,
 							tau_val[l] = g_val[l]
 						#end
 					#end
-					
+
 					#
 					for l in xrange(constraints):
 						L_val += lambda_val[l]*tau_val[l] + rp_val[l]*tau_val[l]**2
 					#end
-					
+
 				#end
-				
-				# 
+
+				#
 				HM[i,dimensions] = L_val
-				
+
 			#end
-			
-			# 
+
+			#
 			k_out -= 1
 			continue
-			
+
 		#end
-		
-		
+
+
 		# Print Outer
 		if (prtoutiter != 0 and numpy.mod(k_out,prtoutiter) == 0):
-			
+
 			# Output to screen
 			print("="*80 + "\n")
 			print("NUMBER OF ITERATIONS: %d\n" %(k_out))
@@ -469,7 +471,7 @@ def alhso(dimensions,constraints,neqcons,xtype,x0,xmin,xmax,
 			for l in xrange(constraints):
 				print("\tL(%d) = %g" %(l,lambda_val[l]))
 			#end
-			
+
 			print("\nDESIGN VARIABLES VALUES:")
 			if (scale == 1):
 				x_tmp = (best_x_val[:] * space_halflen) + space_centre
@@ -512,7 +514,7 @@ def alhso(dimensions,constraints,neqcons,xtype,x0,xmin,xmax,
 			for l in xrange(constraints):
 				ofile.write("\tL(%d) = %g\n" %(l,lambda_val[l]))
 			#end
-			
+
 			ofile.write("\nDESIGN VARIABLES VALUES:\n")
 			if (scale == 1):
 				x_tmp = (best_x_val[:] * space_halflen) + space_centre
@@ -533,8 +535,8 @@ def alhso(dimensions,constraints,neqcons,xtype,x0,xmin,xmax,
 			ofile.write("\n" + "="*80 + "\n")
 			ofile.flush()
 		#end
-		
-		
+
+
 		# Test Constraint convergence
 		stop_constraints_flag = 0
 		if (constraints == 0):
@@ -542,7 +544,7 @@ def alhso(dimensions,constraints,neqcons,xtype,x0,xmin,xmax,
 		else:
 			for l in xrange(neqcons):
 				if (abs(best_g_val[l]) <= etol):
-					stop_constraints_flag += 1 
+					stop_constraints_flag += 1
 				#end
 			#end
 			for l in xrange(neqcons,constraints):
@@ -556,14 +558,14 @@ def alhso(dimensions,constraints,neqcons,xtype,x0,xmin,xmax,
 				stop_constraints_flag = 0
 			#end
 		#end
-		
+
 		# Test Position and Function convergence
 		if (best_f_old == []):
 			best_f_old = best_f_val
 		#end
 		stop_criteria_flag = 0
 		if (stopcriteria == 1):
-			
+
 			# Absolute Change in Objective
 			absfdiff = abs(best_f_val - best_f_old)
 			if (absfdiff <= atol):
@@ -571,7 +573,7 @@ def alhso(dimensions,constraints,neqcons,xtype,x0,xmin,xmax,
 			else:
 				kobj = 0
 			#end
-			
+
 			# Relative Change in Objective
 			if (abs(best_f_old) > 1e-10):
 				if (abs(absfdiff/abs(best_f_old)) <= rtol):
@@ -580,33 +582,33 @@ def alhso(dimensions,constraints,neqcons,xtype,x0,xmin,xmax,
 					iobj = 0
 				#end
 			#end
-			
-			# 
+
+			#
 			best_f_old = best_f_val
-			
-			# 
+
+			#
 			if (kobj > stopiters or iobj > stopiters):
 				stop_criteria_flag = 1
 			else:
 				stop_criteria_flag = 0
 			#end
-			
+
 		#end
-		
+
 		# Test Convergence
 		if (stop_constraints_flag == 1 and stop_criteria_flag == 1):
 			stop_main_flag = 1
 		else:
 			stop_main_flag = 0
 		#end
-		
-		
+
+
 		# Update Augmented Lagrangian Terms
 		if (stop_main_flag == 0):
-			
+
 			if (constraints > 0):
-				
-				# Tau for Best 
+
+				# Tau for Best
 				for l in xrange(neqcons):
 					tau_val[l] = best_g_val[l]
 				#end
@@ -617,13 +619,13 @@ def alhso(dimensions,constraints,neqcons,xtype,x0,xmin,xmax,
 						tau_val[l] = -lambda_val[l]/(2*rp_val[l])
 					#end
 				#end
-				
+
 				# Update Lagrange Multiplier
 				for l in xrange(constraints):
 					lambda_old[l] = lambda_val[l]
 					lambda_val[l] += 2*rp_val[l]*tau_val[l]
 				#end
-				
+
 				# Update Penalty Factor
 				for l in xrange(neqcons):
 					if (abs(best_g_val[l]) > abs(best_g_old[l]) and abs(best_g_val[l]) > etol):
@@ -639,13 +641,13 @@ def alhso(dimensions,constraints,neqcons,xtype,x0,xmin,xmax,
 						rp_val[l] = 0.5*rp_val[l]
 					#end
 				#end
-				
+
 				# Apply Lower Bounds on rp
 				for l in xrange(neqcons):
 					if (rp_val[l] < 0.5*(abs(lambda_val[l])/etol)**0.5):
 						rp_val[l] = 0.5*(abs(lambda_val[l])/etol)**0.5
 					#end
-				#end	
+				#end
 				for l in xrange(neqcons,constraints):
 					if (rp_val[l] < 0.5*(abs(lambda_val[l])/itol)**0.5):
 						rp_val[l] = 0.5*(abs(lambda_val[l])/itol)**0.5
@@ -656,20 +658,20 @@ def alhso(dimensions,constraints,neqcons,xtype,x0,xmin,xmax,
 						rp_val[l] = 1
 					#end
 				#end
-				
-				# 
+
+				#
 				best_g_old[:] = best_g_val[:]
-				
+
 			#end
-			
+
 		#end
-		
+
 	#end
-	
-	
+
+
 	# Print Results
 	if (prtoutiter != 0):
-		
+
 		# Output to screen
 		print("="*80 + "\n")
 		print("RANDOM SEED VALUE: %.8f\n" %(rseed))
@@ -693,7 +695,7 @@ def alhso(dimensions,constraints,neqcons,xtype,x0,xmin,xmax,
 		for l in xrange(constraints):
 			print("\tL(%d) = %g" %(l,float(lambda_val[l])))
 		#end
-		
+
 		print("\nDESIGN VARIABLES VALUES:")
 		if (scale == 1):
 			x_tmp = (best_x_val[:] * space_halflen) + space_centre
@@ -737,7 +739,7 @@ def alhso(dimensions,constraints,neqcons,xtype,x0,xmin,xmax,
 		for l in xrange(constraints):
 			ofile.write("\tL(%d) = %g\n" %(l,float(lambda_val[l])))
 		#end
-		
+
 		ofile.write("\nDESIGN VARIABLES VALUES:\n")
 		if (scale == 1):
 			x_tmp = (best_x_val[:] * space_halflen) + space_centre
@@ -756,11 +758,11 @@ def alhso(dimensions,constraints,neqcons,xtype,x0,xmin,xmax,
 		#end
 		ofile.write(text)
 		ofile.write("\n" + "="*80 + "\n")
-		
+
 		ofile.close()
 	#end
-	
-	
+
+
 	# Results
 	if (scale == 1):
 		opt_x = (best_x_val * space_halflen) + space_centre
@@ -773,29 +775,29 @@ def alhso(dimensions,constraints,neqcons,xtype,x0,xmin,xmax,
 	opt_f = best_f_val
 	opt_g = best_g_val
 	opt_lambda = lambda_val[:]
-	
+
 	return opt_x,opt_f,opt_g,opt_lambda,nfevals,'%.8f' %(rseed)
-	
+
 
 
 # =============================================================================
 # chso Function
 # =============================================================================
 def chso(ND,nc,nec,xtype,x0,lb,ub,bw,HMS,HMCR,PAR,maxIter,printout,rseed,objfunc):
-	
+
 	'''
 	CHSO function - Python Version of the Constrained Harmony Search Optimizer
 	
 	Documentation last updated:  October. 16, 2008 - Ruben Perez
 	'''
-	
+
 	# Set random number seed
 	rand = random.Random()
-	if rseed == {}:	
+	if rseed == {}:
 		rseed = time.time()
 	#end
-	
-	
+
+
 	# Initialize
 	HM = numpy.zeros((HMS,ND+1), float)
 	for i in xrange(HMS):
@@ -805,35 +807,35 @@ def chso(ND,nc,nec,xtype,x0,lb,ub,bw,HMS,HMCR,PAR,maxIter,printout,rseed,objfunc
 		[f0,gs0] = objfunc(HM[i,:-1])
 		HM[i,ND] = f0
 	#end
-	
+
 	# Print Initial Header
 	if (printout == 1):
 		#print(' Iteration   Func-count     min f(x)')
 		print(' Iteration   min f(x)');
 	#end
-	
-	
+
+
 	# Iterations Loop
 	x = numpy.zeros(ND,float)
 	numFunEvals = 0
 	k = 0
 	status = 0
 	while status != 1:
-		
+
 		# New Harmony Improvisation
 		for j in xrange(ND):
-			
-			# 
+
+			#
 			if (rand.random() >= HMCR):
-				
+
 				# Random Searching
 				x[j] = lb[j] + rand.random()*(ub[j] - lb[j])
-				
+
 			else:
-				
+
 				# Harmony Memory Considering
 				x[j] = HM[int(HMS*rand.random()),j]
-				
+
 				# Pitch Adjusting
 				if (rand.random() <= PAR):
 					if (rand.random() > 0.5):
@@ -842,17 +844,17 @@ def chso(ND,nc,nec,xtype,x0,lb,ub,bw,HMS,HMCR,PAR,maxIter,printout,rseed,objfunc
 						x[j] = x[j] - rand.random()*((ub[j] - lb[j])/bw[j])
 					#end
 				#end
-				
+
 			#end
 		#end
-		
-		# 
+
+		#
 		[fval,gvals] = objfunc(x)
 		numFunEvals += 1
-		
-		# 
+
+		#
 		if (sum(gvals) <= 0):
-			
+
 			# Harmony Memory Update
 			hmax_num = 0
 			hmax = HM[0,ND]
@@ -862,14 +864,14 @@ def chso(ND,nc,nec,xtype,x0,lb,ub,bw,HMS,HMCR,PAR,maxIter,printout,rseed,objfunc
 					hmax = HM[i,ND]
 				#end
 			#end
-			
+
 			if (fval < hmax):
 				for j in xrange(ND):
 					HM[hmax_num,j] = x[j]
 				#end
 				HM[hmax_num,ND] = fval
 			#end
-			
+
 			hmin_num = 0
 			hmin = HM[0,ND]
 			for i in xrange(HMS):
@@ -878,7 +880,7 @@ def chso(ND,nc,nec,xtype,x0,lb,ub,bw,HMS,HMCR,PAR,maxIter,printout,rseed,objfunc
 					hmin = HM[i,ND]
 				#end
 			#end
-			
+
 			# Print
 			if (fval == hmin):
 				opt_x = x
@@ -889,9 +891,9 @@ def chso(ND,nc,nec,xtype,x0,lb,ub,bw,HMS,HMCR,PAR,maxIter,printout,rseed,objfunc
 					print('%i,%f' %(k,fval))
 				#end
 			#end
-			
+
 		#end
-		
+
 		# Test Convergence
 		if k == maxIter-1:
 			if (printout == 1):
@@ -902,25 +904,25 @@ def chso(ND,nc,nec,xtype,x0,lb,ub,bw,HMS,HMCR,PAR,maxIter,printout,rseed,objfunc
 		else:
 			k += 1
 		#end
-		
+
 	#end
-	
+
 	# Print
 	if (printout == 1):
 		print '\nNumber of function evaluations = %f\n' %(numFunEvals)
 	#end
-	
+
 	return opt_x,opt_f,opt_g,numFunEvals,'%.8f' %(rseed)
-	
+
 
 #==============================================================================
 # Optimizers Test
 #==============================================================================
 if __name__ == '__main__':
-	
+
 	print 'Testing ...'
-	
+
 	# Test alpso
 	alhso = alhso()
 	print alhso
-	
+

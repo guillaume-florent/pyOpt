@@ -1,4 +1,6 @@
 #!/usr/bin/env python
+# coding: utf-8
+
 '''
 pyMMA - A Python pyOpt interface to MMA. 
 
@@ -80,13 +82,13 @@ eps = 2.0*eps
 # MMA Optimizer Class
 # =============================================================================
 class MMA(Optimizer):
-	
+
 	'''
 	MMA Optimizer Class - Inherited from Optimizer Abstract Class
 	'''
-	
+
 	def __init__(self, pll_type=None, *args, **kwargs):
-		
+
 		'''
 		MMA Optimizer Class Initialization
 		
@@ -96,7 +98,7 @@ class MMA(Optimizer):
 		
 		Documentation last updated:  Feb. 16, 2010 - Peter W. Jansen
 		'''
-		
+
 		#
 		if (pll_type == None):
 			self.poa = False
@@ -105,8 +107,8 @@ class MMA(Optimizer):
 		else:
 			raise ValueError("pll_type must be either None or 'POA'")
 		#end
-		
-		
+
+
 		#
 		name = 'MMA'
 		category = 'Local Optimizer'
@@ -114,22 +116,22 @@ class MMA(Optimizer):
 		# MMA Options
 		'MAXIT':[int,1000],     	# Maximum Iterations
 		'GEPS':[float,1e-6],    	# Dual Objective Gradient Tolerance
-		'DABOBJ':[float,1e-6],  	# 
-		'DELOBJ':[float,1e-6],  	# 
-		'ITRM':[int,2],         	# 
+		'DABOBJ':[float,1e-6],  	#
+		'DELOBJ':[float,1e-6],  	#
+		'ITRM':[int,2],         	#
 		'IPRINT':[int,1],       	# Output Level (<0 - None, 0 - Screen, 1 - File)
 		'IOUT':[int,6],         	# Output Unit Number
 		'IFILE':[str,'MMA.out'],	# Output File Name
 		}
 		informs = {
-		0 : 'The optimality conditions are satisfied.', 
+		0 : 'The optimality conditions are satisfied.',
 		1 : 'The algorithm has been stopped after MAXIT iterations.',
 		}
 		Optimizer.__init__(self, name, category, def_opts, informs, *args, **kwargs)
-		
-		
+
+
 	def __solve__(self, opt_problem={}, sens_type='FD', store_sol=True, disp_opts=False, store_hst=False, hot_start=False, sens_mode='', sens_step={}, *args, **kwargs):
-		
+
 		'''
 		Run Optimizer (Optimize Routine)
 		
@@ -148,12 +150,12 @@ class MMA(Optimizer):
 		
 		Documentation last updated:  February. 2, 2011 - Peter W. Jansen
 		'''
-		
-		# 
+
+		#
 		if ((self.poa) and (sens_mode.lower() == 'pgc')):
 			raise NotImplementedError("pyMMA - Current implementation only allows single level parallelization, either 'POA' or 'pgc'")
 		#end
-		
+
 		if self.poa or (sens_mode.lower() == 'pgc'):
 			try:
 				import mpi4py
@@ -174,22 +176,22 @@ class MMA(Optimizer):
 			self.pll = False
 			self.myrank = 0
 		#end
-		
+
 		myrank = self.myrank
-		
-		# 
+
+		#
 		def_fname = self.options['IFILE'][1].split('.')[0]
 		hos_file, log_file, tmp_file = self._setHistory(opt_problem.name, store_hst, hot_start, def_fname)
-		
+
 		#
 		gradient = Gradient(opt_problem, sens_type, sens_mode, sens_step, *args, **kwargs)
-		
-		
+
+
 		#======================================================================
 		# MMA - Objective/Constraint Values and Gradients Function
 		#======================================================================
 		def func(m,n,xval,f0val,df0dx,fval,dfdx):
-			
+
 			# Variables Groups Handling
 			if opt_problem.use_groups:
 				xg = {}
@@ -204,10 +206,10 @@ class MMA(Optimizer):
 			else:
 				xn = xval
 			#end
-			
+
 			# Flush Output Files
 			self.flushFiles()
-			
+
 			# Evaluate User Function (Real Valued)
 			fail = 0
 			f = []
@@ -223,16 +225,16 @@ class MMA(Optimizer):
 					#end
 				#end
 			#end
-			
+
 			if self.pll:
 				self.h_start = Bcast(self.h_start,root=0)
 			#end
 			if self.h_start and self.pll:
 				[f,g,fail] = Bcast([f,g,fail],root=0)
-			elif not self.h_start:	
+			elif not self.h_start:
 				[f,g,fail] = opt_problem.obj_fun(xn, *args, **kwargs)
 			#end
-			
+
 			# Store History
 			if (myrank == 0):
 				if self.sto_hst:
@@ -242,7 +244,7 @@ class MMA(Optimizer):
 					log_file.write(fail,'fail')
 				#end
 			#end
-			
+
 			# Gradients
 			if self.h_start:
 				df = []
@@ -254,7 +256,7 @@ class MMA(Optimizer):
 						hos_file.close()
 					else:
 						df = vals['grad_obj'][0].reshape((len(opt_problem._objectives.keys()),len(opt_problem._variables.keys())))
-						dg = vals['grad_con'][0].reshape((len(opt_problem._constraints.keys()),len(opt_problem._variables.keys())))	
+						dg = vals['grad_con'][0].reshape((len(opt_problem._constraints.keys()),len(opt_problem._variables.keys())))
 					#end
 				#end
 				if self.pll:
@@ -264,27 +266,27 @@ class MMA(Optimizer):
 					[df,dg] = Bcast([df,dg],root=0)
 				#end
 			#end
-			
+
 			if not self.h_start:
-				
+
 				#
 				df,dg = gradient.getGrad(xval, group_ids, [f], g, *args, **kwargs)
-				
+
 			#end
-			
+
 			# Store History
 			if self.sto_hst and (myrank == 0):
 				log_file.write(df,'grad_obj')
 				log_file.write(dg,'grad_con')
 			#end
-			
+
 			# Objective Assigment
 			if isinstance(f,complex):
 				f0val = f.astype(float)
 			else:
 				f0val = f
 			#end
-			
+
 			# Constraints Assigment
 			for i in xrange(len(opt_problem._constraints.keys())):
 				if isinstance(g[i],complex):
@@ -293,7 +295,7 @@ class MMA(Optimizer):
 					fval[i] = g[i]
 				#end
 			#end
-			
+
 			# Gradients Assigment
 			k = 0
 			for i in xrange(len(opt_problem._variables.keys())):
@@ -311,11 +313,11 @@ class MMA(Optimizer):
 					k += 1
 				#end
 			#end
-			
+
 			return f0val,df0dx,fval,dfdx
-		
-		
-		
+
+
+
 		# Variables Handling
 		n = len(opt_problem._variables.keys())
 		xmin = []
@@ -335,7 +337,7 @@ class MMA(Optimizer):
 		xmin = numpy.array(xmin)
 		xmax = numpy.array(xmax)
 		xval = numpy.array(xval)
-		
+
 		# Variables Groups Handling
 		group_ids = {}
 		if opt_problem.use_groups:
@@ -345,8 +347,8 @@ class MMA(Optimizer):
 				group_ids[opt_problem._vargroups[key]['name']] = [k,k+group_len]
 				k += group_len
 			#end
-		#end		
-		
+		#end
+
 		# Constraints Handling
 		m = len(opt_problem._constraints.keys())
 		neqc = 0
@@ -366,7 +368,7 @@ class MMA(Optimizer):
 		#end
 		#fval = numpy.array(fval)
 		fmax = numpy.array(fmax)
-		
+
 		# Objective Handling
 		objfunc = opt_problem.obj_fun
 		nobj = len(opt_problem._objectives.keys())
@@ -375,27 +377,27 @@ class MMA(Optimizer):
 			f0val.append(opt_problem._objectives[key].value)
 		#end
 		f0val = numpy.array(f0val)
-		
-		
+
+
 		# Setup argument list values
-		
+
 		xmma = numpy.zeros([n], numpy.float)
-		
-		# Space used internally by the program 
-		# for the asymptotes (xlow and xupp) and 
+
+		# Space used internally by the program
+		# for the asymptotes (xlow and xupp) and
 		# computed bounds on x (alpha and beta)
 		xlow = numpy.zeros([n], numpy.float)
 		xupp = numpy.zeros([n], numpy.float)
 		alfa = numpy.zeros([n], numpy.float)
 		beta = numpy.zeros([n], numpy.float)
-		
-		# The objective and constraint function 
+
+		# The objective and constraint function
 		# values and space for the gradients
 		fval = numpy.zeros([m], numpy.float)
 		df0dx = numpy.zeros([n], numpy.float)
 		dfdx = numpy.zeros([m*n], numpy.float)
-		
-		# Space for the coefficients and artificial 
+
+		# Space for the coefficients and artificial
 		# variables to be computed (set to default values)
 		p = numpy.zeros([m*n], numpy.float)
 		q = numpy.zeros([m*n], numpy.float)
@@ -406,19 +408,19 @@ class MMA(Optimizer):
 		z = numpy.array([0.], numpy.float)
 		a = numpy.zeros([m], numpy.float)
 		c = 10000*numpy.ones([m], numpy.float)
-		
-		# Space for the Lagrange multipliers (ulam) 
+
+		# Space for the Lagrange multipliers (ulam)
 		# the gradient of the dual objective function,
 		# search direction, and Hessian of the dual objective
 		ulam = numpy.ones([m], numpy.float)
 		gradf = numpy.zeros([m], numpy.float)
 		dsrch = numpy.zeros([m], numpy.float)
 		hessf = numpy.zeros([m*(m+1)/2], numpy.float)
-		
+
 		# Specify that all variables are free to move
 		iyfree = numpy.ones([m], numpy.int)
-		
-		# 
+
+		#
 		iter = numpy.array([0], numpy.int)
 		maxit = numpy.array([self.options['MAXIT'][1]], numpy.int)
 		geps = numpy.array([self.options['GEPS'][1]], numpy.float)
@@ -439,10 +441,10 @@ class MMA(Optimizer):
 				#end
 			#end
 		#end
-		
+
 		#
 		nfunc = numpy.array([0], numpy.int)
-		
+
 		# Run MMA
 		t0 = time.time()
 		mma.mma(n,m,iter,maxit,geps,dabobj,delobj,itrm,inform,
@@ -450,7 +452,7 @@ class MMA(Optimizer):
 			fmax,df0dx,dfdx,p,q,p0,q0,b,y,z,a,c,ulam,gradf,
 			dsrch,hessf,iyfree,iprint,iout,ifile,nfunc,func)
 		sol_time = time.time() - t0
-		
+
 		if (myrank == 0):
 			if self.sto_hst:
 				log_file.close()
@@ -462,44 +464,44 @@ class MMA(Optimizer):
 					os.rename(name+'_tmp.cue',name+'.cue')
 					os.rename(name+'_tmp.bin',name+'.bin')
 				#end
-			#end		
+			#end
 		#end
-		
+
 		if (iprint > 0):
 			mma.closeunit(self.options['IOUT'][1])
 		#end
-		
-		
+
+
 		# Store Results
 		sol_inform = {}
 		sol_inform['value'] = inform[0]
 		sol_inform['text'] = self.getInform(inform[0])
-		
+
 		if store_sol:
-			
+
 			sol_name = 'MMA Solution to ' + opt_problem.name
-			
+
 			sol_options = copy.copy(self.options)
 			if sol_options.has_key('defaults'):
 				del sol_options['defaults']
 			#end
-			
+
 			sol_evals = nfunc[0]
-			
+
 			sol_vars = copy.deepcopy(opt_problem._variables)
 			i = 0
 			for key in sol_vars.keys():
 				sol_vars[key].value = xmma[i]
 				i += 1
 			#end
-			
+
 			sol_objs = copy.deepcopy(opt_problem._objectives)
 			i = 0
 			for key in sol_objs.keys():
 				sol_objs[key].value = f0val[i]
 				i += 1
 			#end
-			
+
 			if m > 0:
 				sol_cons = copy.deepcopy(opt_problem._constraints)
 				i = 0
@@ -510,45 +512,45 @@ class MMA(Optimizer):
 			else:
 				sol_cons = {}
 			#end
-			
+
 			sol_lambda = {}
-			
-			
-			opt_problem.addSol(self.__class__.__name__, sol_name, objfunc, sol_time, 
-				sol_evals, sol_inform, sol_vars, sol_objs, sol_cons, sol_options, 
-				display_opts=disp_opts, Lambda=sol_lambda, Sensitivities=sens_type, 
+
+
+			opt_problem.addSol(self.__class__.__name__, sol_name, objfunc, sol_time,
+				sol_evals, sol_inform, sol_vars, sol_objs, sol_cons, sol_options,
+				display_opts=disp_opts, Lambda=sol_lambda, Sensitivities=sens_type,
 				myrank=myrank, arguments=args, **kwargs)
-			
+
 		#end
-		
+
 		return f0val, xmma, sol_inform
-		
-		
-		
+
+
+
 	def _on_setOption(self, name, value):
-		
+
 		'''
 		Set Optimizer Option Value (Optimizer Specific Routine)
 		
 		Documentation last updated:  May. 07, 2008 - Ruben E. Perez
 		'''
-		
+
 		pass
-		
-		
+
+
 	def _on_getOption(self, name):
-		
+
 		'''
 		Get Optimizer Option Value (Optimizer Specific Routine)
 		
 		Documentation last updated:  May. 07, 2008 - Ruben E. Perez
 		'''
-		
+
 		pass
-		
-		
+
+
 	def _on_getInform(self, infocode):
-		
+
 		'''
 		Get Optimizer Result Information (Optimizer Specific Routine)
 		
@@ -558,33 +560,33 @@ class MMA(Optimizer):
 		
 		Documentation last updated:  May. 07, 2008 - Ruben E. Perez
 		'''
-		
+
 		return self.informs[infocode]
-		
-		
+
+
 	def _on_flushFiles(self):
-		
+
 		'''
 		Flush the Output Files (Optimizer Specific Routine)
 		
 		Documentation last updated:  August. 09, 2009 - Ruben E. Perez
 		'''
-		
-		# 
+
+		#
 		iPrint = self.options['IPRINT'][1]
 		if (iPrint >= 0):
 			mma.pyflush(self.options['IOUT'][1])
 		#end
-	
+
 
 
 #==============================================================================
 # MMA Optimizer Test
 #==============================================================================
 if __name__ == '__main__':
-	
+
 	# Test MMA
 	print 'Testing ...'
 	mma = MMA()
 	print mma
-	
+

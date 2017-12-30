@@ -1,4 +1,6 @@
 #!/usr/bin/env python
+# coding: utf-8
+
 '''
 pySOLVOPT - A Python pyOpt interface to SOLVOPT. 
 
@@ -79,13 +81,13 @@ eps = 2.0*eps
 # SOLVOPT Optimizer Class
 # =============================================================================
 class SOLVOPT(Optimizer):
-	
+
 	'''
 	SOLVOPT Optimizer Class - Inherited from Optimizer Abstract Class
 	'''
-	
+
 	def __init__(self, pll_type=None, *args, **kwargs):
-		
+
 		'''
 		SOLVOPT Optimizer Class Initialization
 		
@@ -95,7 +97,7 @@ class SOLVOPT(Optimizer):
 		
 		Documentation last updated:  Feb. 16, 2010 - Peter W. Jansen
 		'''
-		
+
 		#
 		if (pll_type == None):
 			self.poa = False
@@ -104,8 +106,8 @@ class SOLVOPT(Optimizer):
 		else:
 			raise ValueError("pll_type must be either None or 'POA'")
 		#end
-		
-		# 
+
+		#
 		name = 'SOLVOPT'
 		category = 'Local Optimizer'
 		def_opts = {
@@ -114,12 +116,12 @@ class SOLVOPT(Optimizer):
 		'maxit':[int,15000],			# Maximum Number of Iterations
 		'iprint':[int,1],     			# Output Level (-1 -> None, 0 -> Final, N - each Nth iter)
 		'gtol':[float,1e-8],  			# Constraints Tolerance
-		'spcdil':[float,2.5], 			# Space Dilation 
+		'spcdil':[float,2.5], 			# Space Dilation
 		'iout':[int,6],     			# Output Unit Number
 		'ifile':[str,'SOLVOPT.out'],	# Output File Name
 		}
 		informs = {
-		1 : 'Normal termination.', 
+		1 : 'Normal termination.',
 		-2 : 'Improper space dimension.',
 		-3 : 'Objective equals infinity.',
 		-4 : 'Gradient equals zero or infinity.',
@@ -134,10 +136,10 @@ class SOLVOPT(Optimizer):
 		-14 : 'Result may be inaccurate in a function value. The function is extremely steep at the optimum.',
 		}
 		Optimizer.__init__(self, name, category, def_opts, informs, *args, **kwargs)
-		
-		
+
+
 	def __solve__(self, opt_problem={}, sens_type='FD', store_sol=True, store_hst=False, hot_start=False, disp_opts=False, sens_mode='', sens_step={}, *args, **kwargs):
-		
+
 		'''
 		Run Optimizer (Optimize Routine)
 		
@@ -156,12 +158,12 @@ class SOLVOPT(Optimizer):
 		
 		Documentation last updated:  February. 2, 2011 - Peter W. Jansen
 		'''
-		
-		# 
+
+		#
 		if ((self.poa) and (sens_mode.lower() == 'pgc')):
 			raise NotImplementedError("pySOLVOPT - Current implementation only allows single level parallelization, either 'POA' or 'pgc'")
 		#end
-		
+
 		if self.poa or (sens_mode.lower() == 'pgc'):
 			try:
 				import mpi4py
@@ -182,22 +184,22 @@ class SOLVOPT(Optimizer):
 			self.pll = False
 			self.myrank = 0
 		#end
-		
+
 		myrank = self.myrank
-		
-		# 
+
+		#
 		def_fname = self.options['ifile'][1].split('.')[0]
 		hos_file, log_file, tmp_file = self._setHistory(opt_problem.name, store_hst, hot_start, def_fname)
-		
-		# 
+
+		#
 		gradient = Gradient(opt_problem, sens_type, sens_mode, sens_step, *args, **kwargs)
-		
-		
+
+
 		#======================================================================
-		# SOLVOPT - Objective/Constraint Values Storage 
+		# SOLVOPT - Objective/Constraint Values Storage
 		#======================================================================
 		def soeval(x):
-			
+
 			# Variables Groups Handling
 			if opt_problem.use_groups:
 				xg = {}
@@ -212,10 +214,10 @@ class SOLVOPT(Optimizer):
 			else:
 				xn = x
 			#end
-			
+
 			# Flush Output Files
 			self.flushFiles()
-			
+
 			# Evaluate User Function
 			fail = 0
 			f = []
@@ -231,16 +233,16 @@ class SOLVOPT(Optimizer):
 					#end
 				#end
 			#end
-			
+
 			if self.pll:
 				self.h_start = Bcast(self.h_start,root=0)
 			#end
 			if self.h_start and self.pll:
 				[f,g,fail] = Bcast([f,g,fail],root=0)
-			elif not self.h_start:	
+			elif not self.h_start:
 				[f,g,fail] = opt_problem.obj_fun(xn, *args, **kwargs)
 			#end
-			
+
 			# Store History
 			if (myrank == 0):
 				if self.sto_hst:
@@ -250,7 +252,7 @@ class SOLVOPT(Optimizer):
 					log_file.write(fail,'fail')
 				#end
 			#end
-			
+
 			# Gradients
 			if self.h_start:
 				df = []
@@ -262,7 +264,7 @@ class SOLVOPT(Optimizer):
 						hos_file.close()
 					else:
 						df = vals['grad_obj'][0].reshape((len(opt_problem._objectives.keys()),len(opt_problem._variables.keys())))
-						dg = vals['grad_con'][0].reshape((len(opt_problem._constraints.keys()),len(opt_problem._variables.keys())))	
+						dg = vals['grad_con'][0].reshape((len(opt_problem._constraints.keys()),len(opt_problem._variables.keys())))
 					#end
 				#end
 				if self.pll:
@@ -272,13 +274,13 @@ class SOLVOPT(Optimizer):
 					[df,dg] = Bcast([df,dg],root=0)
 				#end
 			#end
-			
+
 			if not self.h_start:
-				# 
+				#
 				df,dg = gradient.getGrad(x, group_ids, [f], g, *args, **kwargs)
-				
+
 			#end
-			
+
 			# Store History
 			if (myrank == 0):
 				if self.sto_hst:
@@ -286,14 +288,14 @@ class SOLVOPT(Optimizer):
 					log_file.write(dg,'grad_con')
 				#end
 			#end
-			
+
 			# Objective Assigment
 			if isinstance(f,complex):
 				ff = f.astype(float)
 			else:
 				ff = f
 			#end
-			
+
 			# Constraints Assigment
 			i = 0
 			j = 0
@@ -315,20 +317,20 @@ class SOLVOPT(Optimizer):
 					i += 1
 				#end
 			#end
-			
+
 			# Gradient Assignment
 			df = df[0]
 			dgg = numpy.zeros([len(opt_problem._variables.keys())*2,len(opt_problem._variables.keys())],'d')
 			i = len(opt_problem._constraints.keys())
 			j = 0
 			for key in opt_problem._variables.keys():
-				if (opt_problem._variables[key].lower != -inf): 
+				if (opt_problem._variables[key].lower != -inf):
 					if (gg[i] > 0):
 						dgg[j,j] = -1
-					#end	
+					#end
 					i += 1
 				#end
-				if (opt_problem._variables[key].upper != inf): 
+				if (opt_problem._variables[key].upper != inf):
 					if (gg[i] > 0):
 						dgg[j,j] = 1
 					#end
@@ -337,41 +339,41 @@ class SOLVOPT(Optimizer):
 				j += 1
 			#end
 			dg = numpy.concatenate((dg,dgg),axis=0)
-			
-			
+
+
 			# Store
 			self.stored_data['x'] = copy.copy(x)
 			self.stored_data['f'] = copy.copy(ff)
 			self.stored_data['g'] = copy.copy(gg)
 			self.stored_data['df'] = copy.copy(df)
 			self.stored_data['dg'] = copy.copy(dg)
-			
+
 			return
-		
-		
+
+
 		#======================================================================
 		# SOLVOPT - Objective Value Function
 		#======================================================================
 		def soobjf(n,x,f):
-			
+
 			if ((self.stored_data['x'] != x).any()):
 				soeval(x)
 			#end
-			
+
 			f = self.stored_data['f']
-			
+
 			return f
-		
-		
+
+
 		#======================================================================
 		# SOLVOPT - Constraint Values Function
 		#======================================================================
 		def soobjg(n,x,g):
-			
+
 			if ((self.stored_data['x'] != x).any()):
 				soeval(x)
 			#end
-			
+
 			# Constraints Maximal Residual
 			maxg = numpy.zeros([len(self.stored_data['g'])],float)
 			i = 0
@@ -388,35 +390,35 @@ class SOLVOPT(Optimizer):
 				maxg[i] = max(0,self.stored_data['g'][i])
 				i += 1
 			#end
-			
+
 			g = max(maxg)
-			
+
 			return g
-		
-		
+
+
 		#======================================================================
 		# SOLVOPT - Objective Gradients Function
 		#======================================================================
 		def sogrdf(n,x,df):
-			
+
 			if ((self.stored_data['x'] != x).any()):
 				soeval(x)
 			#end
-			
+
 			df = self.stored_data['df']
-			
+
 			return df
-		
-		
+
+
 		#======================================================================
 		# SOLVOPT - Constraint Gradients Function
 		#======================================================================
 		def sogrdg(n,x,dg):
-			
+
 			if ((self.stored_data['x'] != x).any()):
 				soeval(x)
 			#end
-			
+
 			# Constraints Maximal Residual
 			maxg = numpy.zeros([len(self.stored_data['g'])],float)
 			i = 0
@@ -434,13 +436,13 @@ class SOLVOPT(Optimizer):
 				i += 1
 			#end
 			id = min(numpy.nonzero(maxg==max(maxg))[0])
-			
+
 			dg = self.stored_data['dg'][id]
-			
+
 			return dg
-		
-		
-		
+
+
+
 		# Variables Handling
 		nvar = len(opt_problem._variables.keys())
 		xl = []
@@ -460,7 +462,7 @@ class SOLVOPT(Optimizer):
 		xl = numpy.array(xl)
 		xu = numpy.array(xu)
 		xx = numpy.array(xx)
-		
+
 		# Variables Groups Handling
 		group_ids = {}
 		if opt_problem.use_groups:
@@ -470,8 +472,8 @@ class SOLVOPT(Optimizer):
 				group_ids[opt_problem._vargroups[key]['name']] = [k,k+group_len]
 				k += group_len
 			#end
-		#end		
-		
+		#end
+
 		# Constraints Handling
 		ncon = len(opt_problem._constraints.keys())
 		neqc = 0
@@ -487,17 +489,17 @@ class SOLVOPT(Optimizer):
 		#end
 		nadd = 0
 		for key in opt_problem._variables.keys():
-			if (opt_problem._variables[key].lower != -inf): 
+			if (opt_problem._variables[key].lower != -inf):
 				gg.append(0)
 				nadd += 1
 			#end
-			if (opt_problem._variables[key].upper != inf): 
+			if (opt_problem._variables[key].upper != inf):
 				gg.append(0)
 				nadd += 1
 			#end
 		#end
 		gg = numpy.array(gg,numpy.float)
-		
+
 		# Objective Handling
 		objfunc = opt_problem.obj_fun
 		nobj = len(opt_problem._objectives.keys())
@@ -506,8 +508,8 @@ class SOLVOPT(Optimizer):
 			ff.append(opt_problem._objectives[key].value)
 		#end
 		ff = numpy.array(ff,numpy.float)
-		
-		
+
+
 		# Setup argument list values
 		n = numpy.array([nvar], numpy.int)
 		flg = numpy.array([True], numpy.bool)
@@ -530,7 +532,7 @@ class SOLVOPT(Optimizer):
 		flgc = numpy.array([True], numpy.bool)
 		iout = numpy.array([self.options['iout'][1]], numpy.int)
 		ifile = self.options['ifile'][1]
-		
+
 		if (iprint >= 0):
 			if os.path.isfile(ifile):
 				os.remove(ifile)
@@ -550,22 +552,22 @@ class SOLVOPT(Optimizer):
 		wxx = numpy.zeros([nvar], numpy.float)
 		wdeltax = numpy.zeros([nvar], numpy.float)
 		widx = numpy.zeros([nvar], numpy.int)
-		
-		
+
+
 		# Storage Arrays
 		self.stored_data = {}
 		self.stored_data['x'] = {}  #numpy.zeros([nvar],float)
 		self.stored_data['f'] = {}  #numpy.zeros([nobj],float)
 		self.stored_data['g'] = {}  #numpy.zeros([ncon+nadd],float)
 		self.stored_data['df'] = {} #numpy.zeros([nvar],float)
-		self.stored_data['dg'] = {} #numpy.zeros([ncon+nadd,nvar],float) 
-		
-		
+		self.stored_data['dg'] = {} #numpy.zeros([ncon+nadd,nvar],float)
+
+
 		# Run SOLVOPT
 		t0 = time.time()
 		solvopt.solvopt(n,xx,ff,soobjf,flg,sogrdf,options,flfc,soobjg,flgc,sogrdg,wb,wg,wg0,wg1,wgt,wgc,wz,wx1,wxopt,wxrec,wgrec,wxx,wdeltax,widx,iout,ifile)
 		sol_time = time.time() - t0
-		
+
 		if (myrank == 0):
 			if self.sto_hst:
 				log_file.close()
@@ -577,43 +579,43 @@ class SOLVOPT(Optimizer):
 					os.rename(name+'_tmp.cue',name+'.cue')
 					os.rename(name+'_tmp.bin',name+'.bin')
 				#end
-			#end		
+			#end
 		#end
-		
+
 		if (iprint > 0):
 			solvopt.closeunit(self.options['iout'][1])
 		#end
-		
+
 		# Store Results
 		sol_inform = {}
 		sol_inform['value'] = options[8]
 		sol_inform['text'] = self.getInform(options[8])
-		
+
 		if store_sol:
-			
+
 			sol_name = 'SOLVOPT Solution to ' + opt_problem.name
-			
+
 			sol_options = copy.copy(self.options)
 			if sol_options.has_key('defaults'):
 				del sol_options['defaults']
 			#end
-			
+
 			sol_evals = options[9]+options[10] # assumes cnst fevals and gevals are included in feval & geval
-			
+
 			sol_vars = copy.deepcopy(opt_problem._variables)
 			i = 0
 			for key in sol_vars.keys():
 				sol_vars[key].value = xx[i]
 				i += 1
 			#end
-			
+
 			sol_objs = copy.deepcopy(opt_problem._objectives)
 			i = 0
 			for key in sol_objs.keys():
 				sol_objs[key].value = ff[i]
 				i += 1
 			#end
-			
+
 			if ncon > 0:
 				sol_cons = copy.deepcopy(opt_problem._constraints)
 				i = 0
@@ -627,44 +629,44 @@ class SOLVOPT(Optimizer):
 			else:
 				sol_cons = {}
 			#end
-			
+
 			sol_lambda = {}
-			
-			
-			opt_problem.addSol(self.__class__.__name__, sol_name, objfunc, sol_time, 
-				sol_evals, sol_inform, sol_vars, sol_objs, sol_cons, sol_options, 
-				display_opts=disp_opts, Lambda=sol_lambda, Sensitivities=sens_type, 
+
+
+			opt_problem.addSol(self.__class__.__name__, sol_name, objfunc, sol_time,
+				sol_evals, sol_inform, sol_vars, sol_objs, sol_cons, sol_options,
+				display_opts=disp_opts, Lambda=sol_lambda, Sensitivities=sens_type,
 				myrank=myrank, arguments=args, **kwargs)
-			
+
 		#end
-		
+
 		return ff, xx, sol_inform
-		
-		
+
+
 	def _on_setOption(self, name, value):
-		
+
 		'''
 		Set Optimizer Option Value (Optimizer Specific Routine)
 		
 		Documentation last updated:  May. 07, 2008 - Ruben E. Perez
 		'''
-		
+
 		pass
-		
-		
+
+
 	def _on_getOption(self, name):
-		
+
 		'''
 		Get Optimizer Option Value (Optimizer Specific Routine)
 		
 		Documentation last updated:  May. 07, 2008 - Ruben E. Perez
 		'''
-		
+
 		pass
-		
-		
+
+
 	def _on_getInform(self, infocode):
-		
+
 		'''
 		Get Optimizer Result Information (Optimizer Specific Routine)
 		
@@ -674,37 +676,37 @@ class SOLVOPT(Optimizer):
 		
 		Documentation last updated:  May. 07, 2008 - Ruben E. Perez
 		'''
-		
+
 		if (infocode > 0):
 			return self.informs[1]
 		else:
 			return self.informs[infocode]
 		#end
-		
-		
+
+
 	def _on_flushFiles(self):
-		
+
 		'''
 		Flush the Output Files (Optimizer Specific Routine)
 		
 		Documentation last updated:  August. 09, 2009 - Ruben E. Perez
 		'''
-		
-		# 
+
+		#
 		iprint = self.options['iprint'][1]
 		if (iprint >= 0):
-			solvopt.pyflush(self.options['iout'][1])	
+			solvopt.pyflush(self.options['iout'][1])
 		#end
-	
+
 
 
 #==============================================================================
 # SOLVOPT Optimizer Test
 #==============================================================================
 if __name__ == '__main__':
-	
+
 	# Test SOLVOPT
 	print 'Testing ...'
 	solvopt = SOLVOPT()
 	print solvopt
-	
+

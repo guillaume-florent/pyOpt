@@ -1,4 +1,5 @@
 #!/usr/bin/env python
+# coding: utf-8
 
 import os,sys
 
@@ -18,7 +19,7 @@ from numpy.distutils import log
 def swig_sources(self, sources, extension):
 	# Assuming SWIG 1.3.14 or later. See compatibility note in
 	#   http://www.swig.org/Doc1.3/Python.html#Python_nn6
-	
+
 	new_sources = []
 	swig_sources = []
 	swig_targets = {}
@@ -119,23 +120,23 @@ def swig_sources(self, sources, extension):
 					% (source))
 
 	return new_sources + py_files
-	
+
 
 build_src.build_src.swig_sources = swig_sources
 
 
 def configuration(parent_package='',top_path=None):
-	
+
 	from numpy.distutils.misc_util import Configuration
-	
+
 	config = Configuration('pyNSGA2',parent_package,top_path)
-	
+
 	# platform-specific settings
 	extra_link_args = []
 	if sys.platform == "darwin":
 		extra_link_args.append("-bundle")
 	#end
-	
+
 	config.add_library('nsga2',
 		sources=[os.path.join('source', '*.c')])
 	config.add_extension('nsga2',
@@ -144,11 +145,11 @@ def configuration(parent_package='',top_path=None):
 		libraries=['nsga2'],
 		extra_link_args=extra_link_args)
 	config.add_data_files('LICENSE','README')
-	
+
 	return config
-	
+
 
 if __name__ == '__main__':
 	from numpy.distutils.core import setup
 	setup(**configuration(top_path='').todict())
-	
+
