@@ -25,7 +25,7 @@ def configuration(parent_package='', top_path=None):
     config = Configuration('pyNLPQLP', parent_package, top_path)
 
     config.add_library('nlpqlp',
-                       ources=[os.path.join('source', '*.for')])
+                       sources=[os.path.join('source', '*.for')])
     config.add_extension('nlpqlp',
                          sources=['source/f2py/nlpqlp.pyf'],
                          libraries=['nlpqlp'])
