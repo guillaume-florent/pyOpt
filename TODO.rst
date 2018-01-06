@@ -1,0 +1,19 @@
+
+Code
+----
+
+Documentation last updated by -> delete
+
+Should there be a README in each subpackage? in the source directories?
+
+Miscellaneous
+-------------
+
+Licensed software -> how to get the code
+    FSQP
+    GCMMA
+    MIDACO
+    MMA
+    NLPQL
+    NLPQLP
+    SNOPT
