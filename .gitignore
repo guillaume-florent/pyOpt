@@ -2,6 +2,8 @@
 
 *.bak
 
+*.out
+
 # Byte-compiled / optimized / DLL files
 __pycache__/
 *.py[cod]
@@ -103,3 +105,28 @@ ENV/
 
 # mypy
 .mypy_cache/
+/pyOpt/pyALGENCAN/source/f2py/algencan-f2pywrappers.f
+/pyOpt/pyALGENCAN/source/f2py/algencanmodule.c
+/pyOpt/pyCOBYLA/source/f2py/cobylamodule.c
+/pyOpt/pyCONMIN/source/f2py/conmin-f2pywrappers.f
+/pyOpt/pyCONMIN/source/f2py/conminmodule.c
+/pyOpt/pyFILTERSD/source/f2py/filtersd-f2pywrappers.f
+/pyOpt/pyFILTERSD/source/f2py/filtersdmodule.c
+/pyOpt/pyFSQP/source/f2py/ffsqp-f2pywrappers.f
+/pyOpt/pyFSQP/source/f2py/ffsqpmodule.c
+/pyOpt/pyGCMMA/source/f2py/gcmmamodule.c
+/pyOpt/pyKSOPT/source/f2py/ksoptmodule.c
+/pyOpt/pyMIDACO/source/f2py/midacomodule.c
+/pyOpt/pyMMA/source/f2py/mmamodule.c
+/pyOpt/pyMMFD/source/f2py/mmfdmodule.c
+/pyOpt/pyNLPQL/source/f2py/nlpql-f2pywrappers.f
+/pyOpt/pyNLPQL/source/f2py/nlpqlmodule.c
+/pyOpt/pyNLPQLP/source/f2py/nlpqlpmodule.c
+/pyOpt/pyNSGA2/source/swig/nsga2_wrap.c
+/pyOpt/pyPSQP/source/f2py/psqp-f2pywrappers.f
+/pyOpt/pyPSQP/source/f2py/psqpmodule.c
+/pyOpt/pySDPEN/source/f2py/sdpen-f2pywrappers.f
+/pyOpt/pySDPEN/source/f2py/sdpenmodule.c
+/pyOpt/pySLSQP/source/f2py/slsqpmodule.c
+/pyOpt/pySNOPT/source/f2py/snoptmodule.c
+/pyOpt/pySOLVOPT/source/f2py/solvoptmodule.c
