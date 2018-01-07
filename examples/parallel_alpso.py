@@ -1,16 +1,16 @@
 #!/usr/bin/env python
 # coding: utf-8
 
-"""
-Solves Runarsson's G08 Problem Using ALPSO Parallelization Options
+"""Solves Runarsson's G08 Problem Using ALPSO Parallelization Options
 
-    min 	-(sin(2*pi*x1)**3*sin(2*pi*x2))
-    s.t.:	x1**2 - x2 + 1 <= 0
+    min     -(sin(2*pi*x1)**3*sin(2*pi*x2))
+    s.t.:   x1**2 - x2 + 1 <= 0
             1 - x1 + (x2-4)**2 <= 0
             0 <= xi <= 10,  i = 1,2
         
     x* = [1.2279713, 4.2453733]
     f* = -0.095825
+
 """
 
 from __future__ import print_function
@@ -42,11 +42,12 @@ def objfunc(x):
     tuple
 
     """
-    f = -(((math.sin(2*math.pi*x[0])**3)*math.sin(2*math.pi*x[1]))/((x[0]**3)*(x[0]+x[1])))
+    f = -(((math.sin(2 * math.pi * x[0])**3) * math.sin(2 * math.pi * x[1])) /
+          ((x[0]**3) * (x[0] + x[1])))
 
-    g = [0.0]*2
+    g = [0.0] * 2
     g[0] = x[0]**2 - x[1] + 1
-    g[1] = 1 - x[0] + (x[1]-4)**2
+    g[1] = 1 - x[0] + (x[1] - 4)**2
 
     time.sleep(0.01)
 
@@ -63,6 +64,7 @@ opt_prob.addCon('g1', 'i')
 opt_prob.addCon('g2', 'i')
 
 # Solve Problem (No-Parallelization)
+print("---- No parallelization ----")
 alpso_none = ALPSO()
 alpso_none.setOption('fileout', 0)
 alpso_none(opt_prob)
@@ -70,13 +72,24 @@ if myrank == 0:
     print(opt_prob.solution(0))
 
 # Solve Problem (SPM-Parallelization)
+print("---- SPM Parallelization ----")
 alpso_spm = ALPSO(pll_type='SPM')
 alpso_spm.setOption('fileout', 0)
 alpso_spm(opt_prob)
 print(opt_prob.solution(1))
 
+# REMAINS BLOCKED !!
 # Solve Problem (DPM-Parallelization)
-alpso_dpm = ALPSO(pll_type='DPM')
-alpso_dpm.setOption('fileout', 0)
-alpso_dpm(opt_prob)
+# print("---- DPM Parallelization ----")
+# alpso_dpm = ALPSO(pll_type='DPM')
+# alpso_dpm.setOption('fileout', 0)
+# alpso_dpm(opt_prob)
+# print(opt_prob.solution(2))
+
+# Solve Problem (POA-Parallelization)
+print("---- POA Parallelization ----")
+alpso_poa = ALPSO(pll_type='POA')
+alpso_poa.setOption('fileout', 0)
+alpso_poa(opt_prob)
+# print(opt_prob.solution(3))
 print(opt_prob.solution(2))

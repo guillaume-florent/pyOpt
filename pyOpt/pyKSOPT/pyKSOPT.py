@@ -340,7 +340,12 @@ class KSOPT(Optimizer):
         nwork3 = 2 * max(2 * nvar, nobj + ncon)
         nworkS = nwork0 + nwork1 + nwork2 + nwork3
         nwork = numpy.array([nworkS], numpy.int)
-        work = numpy.zeros([nwork], numpy.float)
+
+        # work = numpy.zeros([nwork], numpy.float)
+        # VisibleDeprecationWarning: converting an array with ndim > 0 to an
+        # index will result in an error in the future
+        work = numpy.zeros(nwork, numpy.float)
+
         itmax = numpy.array([self.options['ITMAX'][1]], numpy.int)
         rdfun = numpy.array([self.options['RDFUN'][1]], numpy.float)
         rhomin = numpy.array([self.options['RHOMIN'][1]], numpy.float)

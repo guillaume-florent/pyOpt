@@ -99,7 +99,8 @@ def alpso(dimensions, constraints, neqcons, xtype, x0, xmin, xmax, swarmsize,
         Send = comm.Send
         Recv = comm.Recv
         Bcast = comm.Bcast
-    elif mpi4py.__version__[0] == '1':
+    # elif mpi4py.__version__[0] == '1':
+    else:  # version can be 1, 2, 3 .... or more
         Barrier = comm.barrier
         Send = comm.send
         Recv = comm.recv
@@ -354,7 +355,6 @@ def alpso(dimensions, constraints, neqcons, xtype, x0, xmin, xmax, swarmsize,
                 Send([-1], proc, break_tag)
 
         else:
-
             # Slave Evaluation Loop
             while 1:
                 recvbuf = Recv(None, master, MPI.ANY_TAG, status)
@@ -594,14 +594,15 @@ def alpso(dimensions, constraints, neqcons, xtype, x0, xmin, xmax, swarmsize,
         for i in range(swarmsize):
             g_old[i, :] = g[i, :]
 
-        # Inner optimization loop - core ALPSO algorithm applied to the lagrangian function
+        # Inner optimization loop -
+        # core ALPSO algorithm applied to the lagrangian function
         k_inn = 0
         stop_inner = 0
         while (k_inn < maxInnIter) and (stop_inner == 0):
-
             k_inn += 1
 
-            # calculating new search radius for the best particle ("Guaranteed Convergence" method)
+            # calculating new search radius for the best particle
+            # ("Guaranteed Convergence" method)
             if (swarm_i == swarm_i_old) and (swarm_L >= swarm_L_old):
                 no_failures += 1
                 no_successes = 0
@@ -654,8 +655,9 @@ def alpso(dimensions, constraints, neqcons, xtype, x0, xmin, xmax, swarmsize,
             # Swarm Update
             for i in range(swarmsize):
                 # Update velocity vector
-                if (nhm == 'dlring') or (nhm == 'slring') or (
-                    nhm == 'wheel') or (nhm == 'spatial') or (nhm == 'sfrac'):
+                if (nhm == 'dlring') or (nhm == 'slring') or \
+                        (nhm == 'wheel') or (nhm == 'spatial') or \
+                        (nhm == 'sfrac'):
                     lbest_x = nhbest_x[i, :]
                 else:
                     lbest_x = swarm_x[:]
@@ -704,7 +706,7 @@ def alpso(dimensions, constraints, neqcons, xtype, x0, xmin, xmax, swarmsize,
                 h_start = Bcast(h_start, root=0)
 
             if not h_start:
-                ## MPI Objective Function Evaluation
+                # MPI Objective Function Evaluation
                 Barrier()
                 if myrank == master:
 
@@ -753,9 +755,7 @@ def alpso(dimensions, constraints, neqcons, xtype, x0, xmin, xmax, swarmsize,
                     # Send break command
                     for proc in range(1, nproc):
                         Send([-1], proc, break_tag)
-
                 else:
-
                     # Slave Evaluation Loop
                     while 1:
                         recvbuf = Recv(None, master, MPI.ANY_TAG, status)
@@ -877,8 +877,8 @@ def alpso(dimensions, constraints, neqcons, xtype, x0, xmin, xmax, swarmsize,
                                         nhps[i].append(i2)
 
             # Neighbourhood Best Update
-            if (nhm == 'dlring') or (nhm == 'slring') or (nhm == 'wheel') or (
-                nhm == 'spatial') or (nhm == 'sfrac'):
+            if (nhm == 'dlring') or (nhm == 'slring') or (nhm == 'wheel') or \
+                    (nhm == 'spatial') or (nhm == 'sfrac'):
                 for i in range(swarmsize):
                     for nbp in nhps[i]:
                         if L[nbp] < nhbest_L[i]:
@@ -917,8 +917,8 @@ def alpso(dimensions, constraints, neqcons, xtype, x0, xmin, xmax, swarmsize,
                 # Output to screen
                 print("=" * 80 + "\n")
                 print("NUMBER OF ITERATIONS: %d\n" % k_out)
-                print(
-                "NUMBER OF OBJECTIVE FUNCTION EVALUATIONS: %d\n" % nfevals)
+                print("NUMBER OF OBJECTIVE FUNCTION EVALUATIONS: %d\n" %
+                      nfevals)
                 print("OBJECTIVE FUNCTION VALUE:")
                 print("\tF = %.16g\n" % (float(swarm_f)))
                 if constraints > 0:
@@ -958,9 +958,8 @@ def alpso(dimensions, constraints, neqcons, xtype, x0, xmin, xmax, swarmsize,
                 # Output to filename
                 ofile.write("\n" + "=" * 80 + "\n")
                 ofile.write("\nNUMBER OF ITERATIONS: %d\n" % k_out)
-                ofile.write(
-                    "\nNUMBER OF OBJECTIVE FUNCTION EVALUATIONS: %d\n" % (
-                    nfevals))
+                ofile.write("\nNUMBER OF OBJECTIVE FUNCTION EVALUATIONS: %d\n" %
+                            nfevals)
                 ofile.write("\nOBJECTIVE FUNCTION VALUE:\n")
                 ofile.write("\tF = %.16g\n" % (float(swarm_f)))
                 if constraints > 0:
@@ -1028,7 +1027,8 @@ def alpso(dimensions, constraints, neqcons, xtype, x0, xmin, xmax, swarmsize,
             stop_criteria_flag = 0
             if stopCriteria == 1:
 
-                # setting up the stopping criteria based on distance and tolerance
+                # setting up the stopping criteria based on
+                # distance and tolerance
                 for k in range(stopIters - 1, 0, -1):
                     global_distance[k] = global_distance[k - 1]
                     global_L[k] = global_L[k - 1]
@@ -1046,11 +1046,11 @@ def alpso(dimensions, constraints, neqcons, xtype, x0, xmin, xmax, swarmsize,
 
                 global_L[0] = swarm_L
 
-                if (abs(global_distance[0] - global_distance[stopIters - 1]) <= \
-                                dtol * abs(global_distance[stopIters - 1]) and \
-                                abs(global_L[0] - global_L[stopIters - 1]) <= \
-                                        rtol * abs(global_L[stopIters - 1]) or \
-                                abs(global_L[0] - global_L[
+                if (abs(global_distance[0] - global_distance[stopIters - 1]) <=
+                            dtol * abs(global_distance[stopIters - 1]) and
+                            abs(global_L[0] - global_L[stopIters - 1]) <=
+                                rtol * abs(global_L[stopIters - 1]) or
+                            abs(global_L[0] - global_L[
                                         stopIters - 1]) <= atol):
                     stop_criteria_flag = 1
                 else:
@@ -1070,15 +1070,15 @@ def alpso(dimensions, constraints, neqcons, xtype, x0, xmin, xmax, swarmsize,
 
                 cvL2 = cvss ** 0.5
                 if stopCriteria == 1:
-                    relL = abs(global_L[0] - global_L[stopIters - 1]) / abs(
-                        global_L[stopIters - 1])
-                    stext = '%9d%8d%8d%15.4e%15f%13.4e%16.4e%14.4e\n' % (
-                    k_out, k_inn, stop_con_num, cvL2, swarm_f, swarm_L, relL,
-                    global_distance[0])
+                    relL = (abs(global_L[0] - global_L[stopIters - 1]) /
+                            abs(global_L[stopIters - 1]))
+                    stext = ('%9d%8d%8d%15.4e%15f%13.4e%16.4e%14.4e\n' %
+                             (k_out, k_inn, stop_con_num, cvL2, swarm_f,
+                              swarm_L, relL, global_distance[0]))
                 else:
-                    stext = '%9d%8d%8d%15.4e%15f%13.4e%16s%14s\n' % (
-                    k_out, k_inn, stop_con_num, cvL2, swarm_f, swarm_L, 'NA',
-                    'NA')
+                    stext = ('%9d%8d%8d%15.4e%15f%13.4e%16s%14s\n' %
+                             (k_out, k_inn, stop_con_num, cvL2, swarm_f,
+                              swarm_L, 'NA', 'NA'))
 
                 sfile.write(stext)
                 sfile.flush()

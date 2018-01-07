@@ -1,12 +1,12 @@
 #!/usr/bin/env python
 # coding: utf-8
 
-"""
-Solves Constrained Rosen-Suzuki Function
+"""Solves Constrained Rosen-Suzuki Function
 
     - Different gradient calculation approaches are used
     
     f* = -6 , x* = [0, 1, 2, -1]
+
 """
 
 from __future__ import print_function

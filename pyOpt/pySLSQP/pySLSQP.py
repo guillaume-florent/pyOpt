@@ -155,7 +155,8 @@ class SLSQP(Optimizer):
             nproc = comm.Get_size()
             if mpi4py.__version__[0] == '0':
                 Bcast = comm.Bcast
-            elif mpi4py.__version__[0] == '1':
+            # elif mpi4py.__version__[0] == '1':
+            else:  # version can be 1, 2, 3 .... or more
                 Bcast = comm.bcast
             self.pll = True
             self.myrank = comm.Get_rank()
@@ -330,11 +331,22 @@ class SLSQP(Optimizer):
         ff = numpy.array(ff, numpy.float)
 
         # Setup argument list values
-        la = numpy.array([max(m, 1)], numpy.int)
-        gg = numpy.zeros([la], numpy.float)
+        # la = numpy.array([max(m, 1)], numpy.int)
+        la = max(m, 1)
+
+        # gg = numpy.zeros([la], numpy.float)
+        # VisibleDeprecationWarning: converting an array with ndim > 0 to an
+        # index will result in an error in the future
+        gg = numpy.zeros(la, numpy.float)
+
         n1 = numpy.array([n + 1], numpy.int)
         df = numpy.zeros([n + 1], numpy.float)
+
+        # VisibleDeprecationWarning: converting an array with ndim > 0
+        # to an index will result in an error in the future
+        # Corrected by the modification of la some lines above
         dg = numpy.zeros([la, n + 1], numpy.float)
+
         acc = numpy.array([self.options['ACC'][1]], numpy.float)
         maxit = numpy.array([self.options['MAXIT'][1]], numpy.int)
         iprint = numpy.array([self.options['IPRINT'][1]], numpy.int)
@@ -358,10 +370,20 @@ class SLSQP(Optimizer):
         slsqpb = (n + 1) * (n / 2) + 2 * m + 3 * n + 3 * (n + 1) + 1
         lwM = lsq + lsi + lsei + slsqpb + n + m
         lw = numpy.array([lwM], numpy.int)
-        w = numpy.zeros([lw], numpy.float)
+
+        # w = numpy.zeros([lw], numpy.float)
+        # VisibleDeprecationWarning: converting an array with ndim > 0 to an
+        # index will result in an error in the future
+        w = numpy.zeros(lw, numpy.float)
+
         ljwM = max(mineq, (n + 1) - meq)
         ljw = numpy.array([ljwM], numpy.int)
-        jw = numpy.zeros([ljw], numpy.intc)
+
+        # jw = numpy.zeros([ljw], numpy.intc)
+        # VisibleDeprecationWarning: converting an array with ndim > 0 to an
+        # index will result in an error in the future
+        jw = numpy.zeros(ljw, numpy.intc)
+
         nfunc = numpy.array([0], numpy.int)
         ngrad = numpy.array([0], numpy.int)
 

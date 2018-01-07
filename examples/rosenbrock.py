@@ -1,13 +1,13 @@
 #!/usr/bin/env python
 # coding: utf-8
 
-"""
-Solves Rosenbrock's Unconstrained Problem.
+"""Solves Rosenbrock's Unconstrained Problem.
 
-    min 	100*(x2-x1^2)**2 + (1-x1)^2
-    s.t.:	-10 <= xi <= 10,  i = 1,2
+    min     100*(x2-x1^2)**2 + (1-x1)^2
+    s.t.:   -10 <= xi <= 10,  i = 1,2
     
     f* = 0 , x* = [1, 1]
+
 """
 
 from __future__ import print_function
@@ -36,7 +36,7 @@ def objfunc(x):
     tuple
 
     """
-    f = 100*(x[1]-x[0]**2)**2+(1-x[0])**2
+    f = 100 * (x[1] - x[0]**2)**2 + (1 - x[0])**2
     g = []
 
     fail = 0

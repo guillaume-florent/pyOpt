@@ -1,8 +1,7 @@
 #!/usr/bin/env python
 # coding: utf-8
 
-"""
-Solves Constrained Toy Problem Storing Optimization History.
+"""Solves Constrained Toy Problem Storing Optimization History.
 
     min     x1^2 + x2^2
     s.t.:   3 - x1 <= 0

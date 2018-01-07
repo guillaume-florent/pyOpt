@@ -130,3 +130,6 @@ ENV/
 /pyOpt/pySLSQP/source/f2py/slsqpmodule.c
 /pyOpt/pySNOPT/source/f2py/snoptmodule.c
 /pyOpt/pySOLVOPT/source/f2py/solvoptmodule.c
+
+/examples/*.bin
+/examples/*.cue

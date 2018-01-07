@@ -1,17 +1,17 @@
 #!/usr/bin/env python
 # coding: utf-8
 
-"""
-Solves MIDACO's Toy Problem Using MIDACO's Parallelization
+"""Solves MIDACO's Toy Problem Using MIDACO's Parallelization
 
-    min 	(x1-1.0)**2 + (x2-2.0)**2 + (x3-3.0)**2 + (x4-4.0)**2 + 1.23456789
-    s.t.:	x1 - 1.0 = 0
+    min     (x1-1.0)**2 + (x2-2.0)**2 + (x3-3.0)**2 + (x4-4.0)**2 + 1.23456789
+    s.t.:   x1 - 1.0 = 0
             1.333333333 - x2 <= 0
             2.666666666 - x3 <= 0
             1 <= xi <= 4,  i = 1,...,4
         
     x* = [, ]
     f* = 
+
 """
 
 from __future__ import print_function
@@ -42,7 +42,8 @@ def objfunc(x):
     tuple
 
     """
-    f =  (x[0]-1.0)**2 + (x[1]-2.0)**2 + (x[2]-3.0)**2 + (x[3]-4.0)**2 + 1.23456789
+    f = ((x[0] - 1.0)**2 + (x[1] - 2.0)**2 + (x[2] - 3.0)**2 + (x[3] - 4.0)**2 +
+         1.23456789)
 
     g = [0.0]*3
     g[0] = x[0] - 1.0

@@ -1,17 +1,13 @@
 #!/usr/bin/env python
 # coding: utf-8
 
-"""
-Solves Langermann Multimodal Problem with Automatic Optimization Refinement.
+"""Solves Langermann Multimodal Problem with Automatic Optimization Refinement.
 """
 
 from __future__ import print_function
 
 from numpy import cos, pi, exp
 
-# =============================================================================
-# Extension modules
-# =============================================================================
 from pyOpt import Optimization
 from pyOpt import NSGA2
 from pyOpt import SLSQP
@@ -35,7 +31,7 @@ def objfunc(x):
 
     f = 0.0
     for i in range(5):
-        f += -(c[i]*exp(-(1/pi)*((x[0]-a[i])**2 + (x[1]-b[i])**2))*cos(pi*((x[0]-a[i])**2 + (x[1]-b[i])**2)))
+        f += -(c[i] * exp(-(1 / pi) * ((x[0] - a[i])**2 + (x[1] - b[i])**2)) * cos(pi * ((x[0] - a[i])**2 + (x[1] - b[i])**2)))
 
     g = [0.0]*1
     g[0] = 20.04895 - (x[0]+2.0)**2 - (x[1]+1.0)**2

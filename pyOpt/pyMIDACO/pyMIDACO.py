@@ -220,7 +220,8 @@ class MIDACO(Optimizer):
                 Barrier = comm.Barrier
                 Send = comm.Send
                 Recv = comm.Recv
-            elif mpi4py.__version__[0] == '1':
+            # elif mpi4py.__version__[0] == '1':
+            else:  # version can be 1, 2, 3 .... or more
                 Bcast = comm.bcast
                 Barrier = comm.barrier
                 Send = comm.send
@@ -449,10 +450,19 @@ class MIDACO(Optimizer):
         lkey = self.options['LKEY'][1]
         liw0 = 2 * nn + ll + 1000
         liw = numpy.array([liw0], numpy.int)
-        iw = numpy.zeros([liw], numpy.int)
+
+        # iw = numpy.zeros([liw], numpy.int)
+        # VisibleDeprecationWarning: converting an array with ndim > 0 to an
+        # index will result in an error in the future
+        iw = numpy.zeros(liw[0], numpy.int)
+
         lrw0 = 200 * nn + 2 * mm + 1000
         lrw = numpy.array([lrw0], numpy.int)
-        rw = numpy.zeros([lrw], numpy.float)
+
+        # rw = numpy.zeros([lrw], numpy.float)
+        # VisibleDeprecationWarning: converting an array with ndim > 0 to an
+        # index will result in an error in the future
+        rw = numpy.zeros(lrw[0], numpy.float)
 
         # Run MIDACO
         t0 = time.time()

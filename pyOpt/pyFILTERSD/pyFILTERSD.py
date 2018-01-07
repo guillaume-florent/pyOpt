@@ -355,8 +355,13 @@ class FILTERSD(Optimizer):
 
         # Setup argument list values
         nn = numpy.array([nvar], numpy.int)
+
         mm = numpy.array([ncon], numpy.int)
-        al = numpy.zeros([mm], numpy.float)
+        # al = numpy.zeros([mm], numpy.float)
+        # VisibleDeprecationWarning: converting an array with ndim > 0 to an
+        # index will result in an error in the future
+        al = numpy.zeros(mm, numpy.float)
+
         ubd = numpy.array([self.options['ubd'][1]], numpy.float)
         rho = numpy.array([self.options['rho'][1]], numpy.float)
         htol = numpy.array([self.options['htol'][1]], numpy.float)

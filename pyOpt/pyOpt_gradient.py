@@ -43,7 +43,7 @@ eps *= 2.0
 
 class Gradient(object):
     """Abstract Class for Optimizer Gradient Calculation Object"""
-    def __init__(self, opt_problem, sens_type, sens_mode='', sens_step=None):
+    def __init__(self, opt_problem, sens_type, sens_mode='', sens_step={}):
         """Optimizer Gradient Calculation Class Initialization
         
         **Arguments:**
@@ -60,8 +60,8 @@ class Gradient(object):
         Documentation last updated:  Feb. 03, 2011 - Peter W. Jansen
 
         """
-        if sens_step is None:
-            sens_step = dict()
+        # if sens_step is None:
+        #     sens_step = dict()
 
         self.opt_problem = opt_problem
         if isinstance(sens_type, str):
@@ -70,7 +70,7 @@ class Gradient(object):
             self.sens_type = sens_type
 
         # if sens_step == {}:
-        if sens_step is False:  # empty dict evaluates to False
+        if bool(sens_step) is False:  # empty dict evaluates to False
             if self.sens_type == 'fd':
                 self.sens_step = 1.0e-6
             elif self.sens_type == 'cs':
@@ -97,7 +97,8 @@ class Gradient(object):
                 self.Send = comm.Send
                 self.Recv = comm.Recv
                 self.Bcast = comm.Bcast
-            elif mpi4py.__version__[0] == '1':
+            # elif mpi4py.__version__[0] == '1':
+            else:  # version can be 1, 2, 3 .... or more
                 self.Send = comm.send
                 self.Recv = comm.recv
                 self.Bcast = comm.bcast
@@ -142,6 +143,7 @@ class Gradient(object):
             k = 0
             for i in mydvs:
                 xh = copy.copy(xs)
+
                 xh[i] += dh
 
                 # Variables Groups Handling

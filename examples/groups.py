@@ -1,8 +1,7 @@
 #!/usr/bin/env python
 # coding: utf-8
 
-"""
-Solves Constrained Toy Problem Using Variable Groups.
+"""Solves Constrained Toy Problem Using Variable Groups.
 
     min     x1^2 + x2^2
     s.t.:   3 - x1 <= 0

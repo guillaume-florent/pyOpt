@@ -28,4 +28,4 @@ for f in os.listdir(dir_):
         except:
             continue
 
-__version__ = "1.2.1"
+__version__ = "1.2.2"

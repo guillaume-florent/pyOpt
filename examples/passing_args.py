@@ -1,11 +1,10 @@
 #!/usr/bin/env python
 # coding: utf-8
 
-"""
-Solves Constrained Rosenbrock's Passing Arguments into Objective Function.
+"""Solves Constrained Rosenbrock's Passing Arguments into Objective Function.
 
-    min 	A1*(X(2)-X(1)^2)^2 + (A2-x(1))^2
-    s.t.:	X(1)^2 + X(2)^2 - A2 <= 0
+    min     A1*(X(2)-X(1)^2)^2 + (A2-x(1))^2
+    s.t.:   X(1)^2 + X(2)^2 - A2 <= 0
             -1.0 <= xi <= 1.0,  i = 1,2
             
     arguments (passing into objfunc as kwargs)
@@ -13,6 +12,7 @@ Solves Constrained Rosenbrock's Passing Arguments into Objective Function.
         A3 = 1.0                (kwarg passing as single arg)
     
     f* = 0.0457 , x* = [0.7864, 0.6177]
+
 """
 
 from __future__ import print_function
@@ -39,8 +39,8 @@ def objfunc(x, **kwargs):
     a2 = kwargs['a12'][1]
     a3 = kwargs['a3']
 
-    f = a1*(x[1]-x[0]**2.)**2. + (a2-x[0])**2.
-    g = [0.0]*2
+    f = a1 * (x[1] - x[0]**2.)**2. + (a2 - x[0])**2.
+    g = [0.0] * 2
     g[0] = x[0]**2. + x[1]**2.0 - a3
 
     fail = 0

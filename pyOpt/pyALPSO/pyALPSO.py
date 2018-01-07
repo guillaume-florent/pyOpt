@@ -62,7 +62,6 @@ class ALPSO(Optimizer):
 
         """
         if pll_type is None:
-
             try:
                 import alpso as alpso
             except:
@@ -72,33 +71,29 @@ class ALPSO(Optimizer):
             name = 'ALPSO'
             self.alpso = alpso
         elif pll_type.upper() == 'SPM':
-
             try:
                 import alpso_spm
                 from mpi4py import MPI
             except:
-                raise ImportError(
-                    'pyALPSO: ALPSO SPM shared library failed to import')
+                raise ImportError('pyALPSO: ALPSO SPM shared library '
+                                  'failed to import')
 
             name = 'ALPSO - SPM'
             self.alpso = alpso_spm
         elif pll_type.upper() == 'DPM':
-
             # if not 'alpso_dpm' in sys.modules:
             #     raise ImportError('pyALPSO: ALPSO DPM shared
             #                       library failed to import')
-
             try:
                 import alpso_dpm
                 from mpi4py import MPI
             except:
-                raise ImportError(
-                    'pyALPSO: ALPSO DPM shared library failed to import')
+                raise ImportError('pyALPSO: ALPSO DPM shared library '
+                                  'failed to import')
 
             name = 'ALPSO - DPM'
             self.alpso = alpso_dpm
         elif pll_type.upper() == 'POA':
-
             try:
                 import alpso_poa
                 from mpi4py import MPI

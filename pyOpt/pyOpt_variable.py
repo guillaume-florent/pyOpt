@@ -78,11 +78,11 @@ class Variable(object):
                     self.upper = int(kwargs['upper'])
 
             # if self.lower == []:
-            if self.lower is False:  # empty list evaluates to False
+            if bool(self.lower) is False:  # empty list evaluates to False
                 raise IOError('An integer variable requires to input '
                               'a lower bound value')
             # if self.upper == []:
-            if self.upper is False:  # empty list evaluates to False
+            if bool(self.upper) is False:  # empty list evaluates to False
                 raise IOError('An integer variable requires to input '
                               'an upper bound value')
         elif type_[0].lower() == 'd':

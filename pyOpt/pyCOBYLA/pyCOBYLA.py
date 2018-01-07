@@ -308,8 +308,17 @@ class COBYLA(Optimizer):
             iprint = numpy.array([0], numpy.int)
 
         maxfun = numpy.array([self.options['MAXFUN'][1]], numpy.int)
-        w = numpy.zeros([n * (3 * n + 2 * m + 11) + 4 * m + 6], numpy.float)
-        iact = numpy.zeros([m + 1], numpy.intc)
+
+        # w = numpy.zeros([n * (3 * n + 2 * m + 11) + 4 * m + 6], numpy.float)
+        # VisibleDeprecationWarning: converting an array with ndim > 0 to an
+        # index will result in an error in the future
+        w = numpy.zeros(n * (3 * n + 2 * m + 11) + 4 * m + 6, numpy.float)
+
+        # iact = numpy.zeros([m + 1], numpy.intc)
+        # VisibleDeprecationWarning: converting an array with ndim > 0 to an
+        # index will result in an error in the future
+        iact = numpy.zeros(m + 1, numpy.intc)
+
         ifail = numpy.array([0], numpy.int)
         nfvals = numpy.array([0], numpy.int)
         iout = numpy.array([self.options['IOUT'][1]], numpy.int)

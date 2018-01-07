@@ -17,3 +17,9 @@ Licensed software -> how to get the code
     NLPQL
     NLPQLP
     SNOPT
+
+Notes
+-----
+
+sudo chown -R guillaume:guillaume anaconda2
+conda install -c anaconda mpi4py

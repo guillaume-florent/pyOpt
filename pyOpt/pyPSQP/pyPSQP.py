@@ -169,8 +169,7 @@ class PSQP(Optimizer):
                                                         store_hst, hot_start,
                                                         def_fname)
 
-        gradient = Gradient(opt_problem, sens_type, sens_mode, sens_step, *args,
-                            **kwargs)
+        gradient = Gradient(opt_problem, sens_type, sens_mode, sens_step)
 
         # ======================================================================
         # PSQP - Objective/Constraint Values Storage
@@ -253,12 +252,10 @@ class PSQP(Optimizer):
                         self.h_start = False
                         hos_file.close()
                     else:
-                        dff = vals['grad_obj'][0].reshape((len(
-                            opt_problem._objectives.keys()), len(
-                            opt_problem._variables.keys())))
-                        dgg = vals['grad_con'][0].reshape((len(
-                            opt_problem._constraints.keys()), len(
-                            opt_problem._variables.keys())))
+                        dff = vals['grad_obj'][0].reshape((len(opt_problem._objectives.keys()),
+                                                           len(opt_problem._variables.keys())))
+                        dgg = vals['grad_con'][0].reshape((len(opt_problem._constraints.keys()),
+                                                           len(opt_problem._variables.keys())))
                 if self.pll:
                     self.h_start = Bcast(self.h_start, root=0)
 

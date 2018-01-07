@@ -160,7 +160,7 @@ class History(object):
                     index = [index, index+1]
                 elif isinstance(index, list):
                     # if index == []:
-                    if index is False:  # empy list evaluates to False
+                    if bool(index) is False:  # empty list evaluates to False
                         index = [self.icount[id_], self.icount[id_]+1]
                         self.icount[id_] += 1
                     elif index == [0, -1]:

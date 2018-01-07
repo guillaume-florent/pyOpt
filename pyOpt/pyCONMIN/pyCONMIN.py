@@ -346,13 +346,15 @@ class CONMIN(Optimizer):
         nn4 = numpy.array([numpy.max([nn2[0], ndv[0]])], numpy.int)
         nn5 = numpy.array([2 * nn4[0]], numpy.int)
         if ncon > 0:
-            gg = numpy.zeros([ncn], numpy.float)
+            # gg = numpy.zeros([ncn], numpy.float)
+            # VisibleDeprecationWarning: converting an array with ndim > 0 to
+            # an index will result in an error in the future
+            gg = numpy.zeros(ncn, numpy.float)
         else:
             gg = numpy.array([0], numpy.float)
 
         if myrank == 0:
-            if (self.options['IPRINT'][1] >= 0 and self.options['IPRINT'][
-                1] <= 4):
+            if 0 <= self.options['IPRINT'][1] <= 4:
                 iprint = numpy.array([self.options['IPRINT'][1]], numpy.int)
             else:
                 raise IOError('Incorrect Output Level Setting')

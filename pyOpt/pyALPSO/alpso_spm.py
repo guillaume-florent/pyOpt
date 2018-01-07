@@ -124,12 +124,14 @@ def alpso(dimensions,
     comm = MPI.COMM_WORLD
     nproc = comm.Get_size()
     myrank = comm.Get_rank()
+
     if mpi4py.__version__[0] == '0':
         Barrier = comm.Barrier
         Send = comm.Send
         Recv = comm.Recv
         Bcast = comm.Bcast
-    elif mpi4py.__version__[0] == '1':
+    # elif mpi4py.__version__[0] == '1':
+    else:  # version can be 1, 2, 3 .... or more
         Barrier = comm.barrier
         Send = comm.send
         Recv = comm.recv
@@ -328,7 +330,7 @@ def alpso(dimensions,
         h_start = Bcast(h_start, root=0)
 
     if not h_start:
-        ## MPI Objective Function Evaluation
+        # MPI Objective Function Evaluation
         x_k = Bcast(x_k, root=0)
         send_buf = {}
         for i in myswarm:
