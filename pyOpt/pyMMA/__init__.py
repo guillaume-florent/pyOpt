@@ -3,8 +3,8 @@
 
 r"""pyMMA __init__"""
 
-try:
-    from pyMMA import MMA
-    __all__ = ['MMA']
-except:
-    __all__ = []
+# try:
+#     from pyMMA import MMA
+#     __all__ = ['MMA']
+# except:
+#     __all__ = []

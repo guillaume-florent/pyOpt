@@ -8,9 +8,9 @@ from __future__ import print_function
 
 from numpy import cos, pi, exp
 
-from pyOpt import Optimization
-from pyOpt import NSGA2
-from pyOpt import SLSQP
+from pyOpt.pyOpt_optimization import Optimization
+from pyOpt.pyNSGA2.pyNSGA2 import NSGA2
+from pyOpt.pySLSQP.pySLSQP import SLSQP
 
 
 def objfunc(x):

@@ -3,8 +3,8 @@
 
 r"""pyALPSO __init__"""
 
-try:
-    from pyALPSO import ALPSO
-    __all__ = ['ALPSO']
-except:
-    __all__ = []
+# try:
+#     from pyALPSO import ALPSO
+#     __all__ = ['ALPSO']
+# except:
+#     __all__ = []

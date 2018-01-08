@@ -42,7 +42,7 @@ import time
 
 import numpy
 
-from pyOpt import Optimizer
+from pyOpt.pyOpt_optimizer import Optimizer
 
 __version__ = '$Revision: $'
 

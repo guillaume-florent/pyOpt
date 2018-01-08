@@ -15,16 +15,16 @@
 from __future__ import print_function
 
 # from pyOpt import *
-from pyOpt import Optimization
-from pyOpt import PSQP
-from pyOpt import SLSQP
-from pyOpt import CONMIN
-from pyOpt import COBYLA
-from pyOpt import SOLVOPT
-from pyOpt import KSOPT
-from pyOpt import NSGA2
-from pyOpt import ALGENCAN
-from pyOpt import FILTERSD
+from pyOpt.pyOpt_optimization import Optimization
+from pyOpt.pyPSQP.pyPSQP import PSQP
+from pyOpt.pySLSQP.pySLSQP import SLSQP
+from pyOpt.pyCONMIN.pyCONMIN import CONMIN
+from pyOpt.pyCOBYLA.pyCOBYLA import COBYLA
+from pyOpt.pySOLVOPT.pySOLVOPT import SOLVOPT
+from pyOpt.pyKSOPT.pyKSOPT import KSOPT
+from pyOpt.pyNSGA2.pyNSGA2 import NSGA2
+from pyOpt.pyALGENCAN.pyALGENCAN import ALGENCAN
+from pyOpt.pyFILTERSD.pyFILTERSD import FILTERSD
 
 
 def objfunc(x):

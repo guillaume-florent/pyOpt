@@ -1,10 +1,22 @@
 
+Python3 compatibility
+
+Import system is a bit weird (using __all_ defined in subpackage to append to pyOpt __all_) -> confusing -> simplify
+
+Doc
+---
+
+Infos about the algorithms
+
+
 Code
 ----
 
 Documentation last updated by -> delete
 
 Should there be a README in each subpackage? in the source directories?
+
+Machine precision code duplication in subpackages
 
 Miscellaneous
 -------------

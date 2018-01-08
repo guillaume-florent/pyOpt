@@ -3,8 +3,8 @@
 
 r"""pyFSQP __init__"""
 
-try:
-    from pyFSQP import FSQP
-    __all__ = ['FSQP']
-except:
-    __all__ = []
+# try:
+#     from pyFSQP import FSQP
+#     __all__ = ['FSQP']
+# except:
+#     __all__ = []

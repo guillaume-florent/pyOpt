@@ -3,8 +3,8 @@
 
 r"""pyALGENCAN __init__"""
 
-try:
-    from pyALGENCAN import ALGENCAN
-    __all__ = ['ALGENCAN']
-except:
-    __all__ = []
+# try:
+#     from pyALGENCAN import ALGENCAN
+#     __all__ = ['ALGENCAN']
+# except:
+#     __all__ = []

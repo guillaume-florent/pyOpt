@@ -13,8 +13,8 @@ from __future__ import print_function
 
 import numpy
 
-from pyOpt import Optimization
-from pyOpt import CONMIN
+from pyOpt.pyOpt_optimization import Optimization
+from pyOpt.pyCONMIN.pyCONMIN import CONMIN
 
 
 def objfunc(x):

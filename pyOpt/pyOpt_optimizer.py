@@ -24,8 +24,8 @@ History
 """
 from __future__ import print_function
 
-from pyOpt import Optimization
-from pyOpt import History
+from pyOpt.pyOpt_optimization import Optimization
+from pyOpt.pyOpt_history import History
 
 __version__ = '$Revision: $'
 

@@ -3,8 +3,8 @@
 
 r"""pyFILTERSD __init__"""
 
-try:
-    from pyFILTERSD import FILTERSD
-    __all__ = ['FILTERSD']
-except:
-    __all__ = []
+# try:
+#     from pyFILTERSD import FILTERSD
+#     __all__ = ['FILTERSD']
+# except:
+#     __all__ = []

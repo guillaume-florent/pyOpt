@@ -3,8 +3,8 @@
 
 r"""pySOLVOPT __init__"""
 
-try:
-    from pySOLVOPT import SOLVOPT
-    __all__ = ['SOLVOPT']
-except:
-    __all__ = []
+# try:
+#     from pySOLVOPT import SOLVOPT
+#     __all__ = ['SOLVOPT']
+# except:
+#     __all__ = []

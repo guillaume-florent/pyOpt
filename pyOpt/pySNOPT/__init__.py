@@ -3,8 +3,8 @@
 
 r"""pySNOPT __init__"""
 
-try:
-    from pySNOPT import SNOPT
-    __all__ = ['SNOPT']
-except:
-    __all__ = []
+# try:
+#     from pySNOPT import SNOPT
+#     __all__ = ['SNOPT']
+# except:
+#     __all__ = []

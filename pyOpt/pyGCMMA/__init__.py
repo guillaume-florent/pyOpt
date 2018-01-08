@@ -3,8 +3,8 @@
 
 r"""pyGCMMA __init__"""
 
-try:
-    from pyGCMMA import GCMMA
-    __all__ = ['GCMMA']
-except:
-    __all__ = []
+# try:
+#     from pyGCMMA import GCMMA
+#     __all__ = ['GCMMA']
+# except:
+#     __all__ = []

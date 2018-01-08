@@ -24,8 +24,8 @@ except:
     raise ImportError('mpi4py is required for parallelization')
 
 # from pyOpt import *
-from pyOpt import Optimization
-from pyOpt import SLSQP
+from pyOpt.pyOpt_optimization import Optimization
+from pyOpt.pySLSQP.pySLSQP import SLSQP
 
 
 def objfunc(x):

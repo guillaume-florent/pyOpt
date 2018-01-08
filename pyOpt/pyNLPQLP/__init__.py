@@ -3,8 +3,8 @@
 
 r"""pyNLPQLP __init__"""
 
-try:
-    from pyNLPQLP import NLPQLP
-    __all__ = ['NLPQLP']
-except:
-    __all__ = []
+# try:
+#     from pyNLPQLP import NLPQLP
+#     __all__ = ['NLPQLP']
+# except:
+#     __all__ = []

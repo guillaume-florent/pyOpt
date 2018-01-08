@@ -79,8 +79,8 @@ class build_opt(build_ext):
         try:
             build_ext.build_extension(self, ext)
         except:
-            self.announce('*** WARNING: Building of optimizer "%s" '
-            'failed: %s' %(ext.name, sys.exc_info()[1]))
+            self.announce("*** WARNING: Building of optimizer '%s' failed: %s"
+                          % (ext.name, sys.exc_info()[1]))
 
 
 def configuration(parent_package='', top_path=None):

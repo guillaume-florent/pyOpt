@@ -25,8 +25,8 @@ except:
     raise ImportError('mpi4py is required for parallelization')
 
 # from pyOpt import *
-from pyOpt import Optimization
-from pyOpt import NLPQLP
+from pyOpt.pyOpt_optimization import Optimization
+from pyOpt.pyNLPQLP.pyNLPQLP import NLPQLP
 
 
 def objfunc(x):
