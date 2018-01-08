@@ -102,7 +102,7 @@ class GCMMA(Optimizer):
         Optimizer.__init__(self, name, category, def_opts, informs, *args,
                            **kwargs)
 
-    def __solve__(self, opt_problem={}, sens_type='FD', store_sol=True,
+    def __solve__(self, opt_problem, sens_type='FD', store_sol=True,
                   disp_opts=False, store_hst=False, hot_start=False,
                   sens_mode='', sens_step={}, *args, **kwargs):
 
@@ -225,7 +225,7 @@ class GCMMA(Optimizer):
                 f0new = f
 
             # Constraints Assigment
-            for i in range(len(opt_problem._constraints.keys())):
+            for i in range(len(opt_problem.constraints.keys())):
                 if isinstance(g[i], complex):
                     fnew[i] = g[i].astype(float)
                 else:
@@ -297,11 +297,11 @@ class GCMMA(Optimizer):
                         hos_file.close()
                     else:
                         df = vals['grad_obj'][0].reshape((len(
-                            opt_problem._objectives.keys()), len(
-                            opt_problem._variables.keys())))
+                            opt_problem.objectives.keys()), len(
+                            opt_problem.variables.keys())))
                         dg = vals['grad_con'][0].reshape((len(
-                            opt_problem._constraints.keys()), len(
-                            opt_problem._variables.keys())))
+                            opt_problem.constraints.keys()), len(
+                            opt_problem.variables.keys())))
 
                 if self.pll:
                     self.h_start = Bcast(self.h_start, root=0)
@@ -325,7 +325,7 @@ class GCMMA(Optimizer):
                 f0val = f
 
             # Constraints Assignment
-            for i in range(len(opt_problem._constraints.keys())):
+            for i in range(len(opt_problem.constraints.keys())):
                 if isinstance(g[i], complex):
                     fval[i] = g[i].astype(float)
                 else:
@@ -333,12 +333,12 @@ class GCMMA(Optimizer):
 
             # Gradients Assigment
             k = 0
-            for i in range(len(opt_problem._variables.keys())):
+            for i in range(len(opt_problem.variables.keys())):
                 if isinstance(df[0, i], complex):
                     df0dx[i] = df[0, i].astype(float)
                 else:
                     df0dx[i] = df[0, i]
-                for jj in range(len(opt_problem._constraints.keys())):
+                for jj in range(len(opt_problem.constraints.keys())):
                     if isinstance(dg[jj, i], complex):
                         dfdx[k] = dg[jj, i].astype(float)
                     else:
@@ -348,18 +348,18 @@ class GCMMA(Optimizer):
             return f0val, df0dx, fval, dfdx
 
         # Variables Handling
-        n = len(opt_problem._variables.keys())
+        n = len(opt_problem.variables.keys())
         xmin = []
         xmax = []
         xval = []
-        for key in opt_problem._variables.keys():
-            if (opt_problem._variables[key].type == 'c'):
-                xmin.append(opt_problem._variables[key].lower)
-                xmax.append(opt_problem._variables[key].upper)
-                xval.append(opt_problem._variables[key].value)
-            elif (opt_problem._variables[key].type == 'i'):
+        for key in opt_problem.variables.keys():
+            if opt_problem.variables[key].type == 'c':
+                xmin.append(opt_problem.variables[key].lower)
+                xmax.append(opt_problem.variables[key].upper)
+                xval.append(opt_problem.variables[key].value)
+            elif opt_problem.variables[key].type == 'i':
                 raise IOError('GCMMA cannot handle integer design variables')
-            elif (opt_problem._variables[key].type == 'd'):
+            elif opt_problem.variables[key].type == 'd':
                 raise IOError('GCMMA cannot handle discrete design variables')
 
         xmin = numpy.array(xmin)
@@ -370,25 +370,25 @@ class GCMMA(Optimizer):
         group_ids = {}
         if opt_problem.use_groups:
             k = 0
-            for key in opt_problem._vargroups.keys():
-                group_len = len(opt_problem._vargroups[key]['ids'])
-                group_ids[opt_problem._vargroups[key]['name']] = [k,
+            for key in opt_problem.vargroups.keys():
+                group_len = len(opt_problem.vargroups[key]['ids'])
+                group_ids[opt_problem.vargroups[key]['name']] = [k,
                                                                   k + group_len]
                 k += group_len
 
         # Constraints Handling
-        m = len(opt_problem._constraints.keys())
+        m = len(opt_problem.constraints.keys())
         neqc = 0
         # fval = []
         fmax = []
         if m > 0:
-            for key in opt_problem._constraints.keys():
-                if opt_problem._constraints[key].type == 'e':
+            for key in opt_problem.constraints.keys():
+                if opt_problem.constraints[key].type == 'e':
                     raise IOError('GCMMA cannot handle equality constraints')
                 # neqc += 1
 
-                # fval.append(opt_problem._constraints[key].value)
-                fmax.append(opt_problem._constraints[key].upper)
+                # fval.append(opt_problem.constraints[key].value)
+                fmax.append(opt_problem.constraints[key].upper)
         else:
             m = 1
             fmax.append(inf)
@@ -398,10 +398,10 @@ class GCMMA(Optimizer):
 
         # Objective Handling
         objfunc = opt_problem.obj_fun
-        nobj = len(opt_problem._objectives.keys())
+        nobj = len(opt_problem.objectives.keys())
         f0val = []
-        for key in opt_problem._objectives.keys():
-            f0val.append(opt_problem._objectives[key].value)
+        for key in opt_problem.objectives.keys():
+            f0val.append(opt_problem.objectives[key].value)
 
         f0val = numpy.array(f0val)
 
@@ -456,7 +456,6 @@ class GCMMA(Optimizer):
         # Specify that all variables are free to move
         iyfree = numpy.ones([m], numpy.int)
 
-        #
         iter = numpy.array([0], numpy.int)
         inntot = numpy.array([0], numpy.int)
         maxit = numpy.array([self.options['MAXIT'][1]], numpy.int)
@@ -521,20 +520,20 @@ class GCMMA(Optimizer):
 
             sol_evals = iter
 
-            sol_vars = copy.deepcopy(opt_problem._variables)
+            sol_vars = copy.deepcopy(opt_problem.variables)
             i = 0
             for key in sol_vars.keys():
                 sol_vars[key].value = xmma[i]
                 i += 1
 
-            sol_objs = copy.deepcopy(opt_problem._objectives)
+            sol_objs = copy.deepcopy(opt_problem.objectives)
             i = 0
             for key in sol_objs.keys():
                 sol_objs[key].value = f0val[i]
                 i += 1
 
             if m > 0:
-                sol_cons = copy.deepcopy(opt_problem._constraints)
+                sol_cons = copy.deepcopy(opt_problem.constraints)
                 i = 0
                 for key in sol_cons.keys():
                     sol_cons[key].value = fval[i]

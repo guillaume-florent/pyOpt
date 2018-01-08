@@ -331,7 +331,7 @@ class SNOPT(Optimizer):
         Optimizer.__init__(self, name, category, def_opts, informs, *args,
                            **kwargs)
 
-    def __solve__(self, opt_problem={}, sens_type='FD', store_sol=True,
+    def __solve__(self, opt_problem, sens_type='FD', store_sol=True,
                   disp_opts=False, store_hst=False, hot_start=False,
                   sens_mode='', sens_step={}, *args, **kwargs):
         """Run Optimizer (Optimize Routine)
@@ -460,8 +460,9 @@ class SNOPT(Optimizer):
                         hos_file.close()
                     else:
                         g_obj = vals['grad_obj'][0]
-                        g_con = vals['grad_con'][0].reshape((len(opt_problem._constraints.keys()),
-                                                             len(opt_problem._variables.keys())))
+                        g_con = vals['grad_con'][0].reshape(
+                            (len(opt_problem.constraints.keys()),
+                             len(opt_problem.variables.keys())))
 
                 if self.pll:
                     self.h_start = Bcast(self.h_start, root=0)
@@ -473,9 +474,9 @@ class SNOPT(Optimizer):
                 dff, dgg = gradient.getGrad(x, group_ids, [f_obj], f_con, *args,
                                             **kwargs)
 
-                for i in range(len(opt_problem._variables.keys())):
+                for i in range(len(opt_problem.variables.keys())):
                     g_obj[i] = dff[0, i]
-                    for j in range(len(opt_problem._constraints.keys())):
+                    for j in range(len(opt_problem.constraints.keys())):
                         g_con[j, i] = dgg[j, i]
 
             if myrank == 0:
@@ -488,7 +489,7 @@ class SNOPT(Optimizer):
                 f_obj = f_obj.astype(float)
 
             # Constraints Assignment
-            for i in range(len(opt_problem._constraints.keys())):
+            for i in range(len(opt_problem.constraints.keys())):
                 if isinstance(f_con[i], complex):
                     f_con[i] = f_con[i].astype(float)
 
@@ -498,18 +499,18 @@ class SNOPT(Optimizer):
             return mode, f_obj, g_obj, f_con, g_con
 
         # Variables Handling
-        nvar = len(opt_problem._variables.keys())
+        nvar = len(opt_problem.variables.keys())
         blx = []
         bux = []
         xs = []
-        for key in opt_problem._variables.keys():
-            if opt_problem._variables[key].type == 'c':
-                blx.append(opt_problem._variables[key].lower)
-                bux.append(opt_problem._variables[key].upper)
-                xs.append(opt_problem._variables[key].value)
-            elif opt_problem._variables[key].type == 'i':
+        for key in opt_problem.variables.keys():
+            if opt_problem.variables[key].type == 'c':
+                blx.append(opt_problem.variables[key].lower)
+                bux.append(opt_problem.variables[key].upper)
+                xs.append(opt_problem.variables[key].value)
+            elif opt_problem.variables[key].type == 'i':
                 raise IOError('SNOPT cannot handle integer design variables')
-            elif opt_problem._variables[key].type == 'd':
+            elif opt_problem.variables[key].type == 'd':
                 raise IOError('SNOPT cannot handle discrete design variables')
 
         blx = numpy.array(blx)
@@ -520,24 +521,24 @@ class SNOPT(Optimizer):
         group_ids = {}
         if opt_problem.use_groups:
             k = 0
-            for key in opt_problem._vargroups.keys():
-                group_len = len(opt_problem._vargroups[key]['ids'])
-                group_ids[opt_problem._vargroups[key]['name']] = [k,
+            for key in opt_problem.vargroups.keys():
+                group_len = len(opt_problem.vargroups[key]['ids'])
+                group_ids[opt_problem.vargroups[key]['name']] = [k,
                                                                   k + group_len]
                 k += group_len
 
         # Constraints Handling
-        ncon = len(opt_problem._constraints.keys())
+        ncon = len(opt_problem.constraints.keys())
         blc = []
         buc = []
         if ncon > 0:
-            for key in opt_problem._constraints.keys():
-                if opt_problem._constraints[key].type == 'e':
-                    blc.append(opt_problem._constraints[key].equal)
-                    buc.append(opt_problem._constraints[key].equal)
-                elif opt_problem._constraints[key].type == 'i':
-                    blc.append(opt_problem._constraints[key].lower)
-                    buc.append(opt_problem._constraints[key].upper)
+            for key in opt_problem.constraints.keys():
+                if opt_problem.constraints[key].type == 'e':
+                    blc.append(opt_problem.constraints[key].equal)
+                    buc.append(opt_problem.constraints[key].equal)
+                elif opt_problem.constraints[key].type == 'i':
+                    blc.append(opt_problem.constraints[key].lower)
+                    buc.append(opt_problem.constraints[key].upper)
         else:
             # if ((store_sol) and (myrank == 0)):
             #   print "Optimization Problem Does Not Have Constraints\n"
@@ -550,10 +551,10 @@ class SNOPT(Optimizer):
 
         # Objective Handling
         objfunc = opt_problem.obj_fun
-        nobj = len(opt_problem._objectives.keys())
+        nobj = len(opt_problem.objectives.keys())
         ff = []
-        for key in opt_problem._objectives.keys():
-            ff.append(opt_problem._objectives[key].value)
+        for key in opt_problem.objectives.keys():
+            ff.append(opt_problem.objectives[key].value)
 
         ff = numpy.array(ff, numpy.float)
 
@@ -764,19 +765,19 @@ class SNOPT(Optimizer):
 
             sol_evals = 0
 
-            sol_vars = copy.deepcopy(opt_problem._variables)
+            sol_vars = copy.deepcopy(opt_problem.variables)
             i = 0
             for key in sol_vars.keys():
                 sol_vars[key].value = xs[i]
                 i += 1
 
-            sol_objs = copy.deepcopy(opt_problem._objectives)
+            sol_objs = copy.deepcopy(opt_problem.objectives)
             i = 0
             for key in sol_objs.keys():
                 sol_objs[key].value = ff[i]
                 i += 1
 
-            sol_cons = copy.deepcopy(opt_problem._constraints)
+            sol_cons = copy.deepcopy(opt_problem.constraints)
             i = 0
             for key in sol_cons.keys():
                 sol_cons[key].value = xs[nvar + i]

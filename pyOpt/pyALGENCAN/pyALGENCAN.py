@@ -104,7 +104,7 @@ class ALGENCAN(Optimizer):
                            **kwargs)
 
     def __solve__(self,
-                  opt_problem={},
+                  opt_problem,
                   sens_type='FD',
                   store_sol=True,
                   disp_opts=False,
@@ -438,7 +438,7 @@ class ALGENCAN(Optimizer):
                 f = ff
 
             # Constraints Assigment
-            for i in range(len(opt_problem._constraints.keys())):
+            for i in range(len(opt_problem.constraints.keys())):
                 if isinstance(gg[i], complex):
                     g[i] = gg[i].astype(float)
                 else:
@@ -476,10 +476,12 @@ class ALGENCAN(Optimizer):
                         self.h_start = False
                         hos_file.close()
                     else:
-                        dff = vals['grad_obj'][0].reshape((len(opt_problem._objectives.keys()),
-                                                           len(opt_problem._variables.keys())))
-                        dgg = vals['grad_con'][0].reshape((len(opt_problem._constraints.keys()),
-                                                           len(opt_problem._variables.keys())))
+                        dff = vals['grad_obj'][0].reshape(
+                            (len(opt_problem.objectives.keys()),
+                             len(opt_problem.variables.keys())))
+                        dgg = vals['grad_con'][0].reshape(
+                            (len(opt_problem.constraints.keys()),
+                             len(opt_problem.variables.keys())))
 
                 if self.pll:
                     self.h_start = Bcast(self.h_start, root=0)
@@ -502,13 +504,13 @@ class ALGENCAN(Optimizer):
                 log_file.write(dgg, 'grad_con')
 
             # Objective Gradient Assignment
-            for i in range(len(opt_problem._variables.keys())):
+            for i in range(len(opt_problem.variables.keys())):
                 jfval[i] = dff[0, i]
 
             # Constraint Gradient Assignment
             jcnnz = 0
-            for jj in range(len(opt_problem._constraints.keys())):
-                for ii in range(len(opt_problem._variables.keys())):
+            for jj in range(len(opt_problem.constraints.keys())):
+                for ii in range(len(opt_problem.variables.keys())):
                     jcfun[jcnnz] = jj + 1
                     jcvar[jcnnz] = ii + 1
                     jcval[jcnnz] = dgg[jj, ii]
@@ -521,14 +523,14 @@ class ALGENCAN(Optimizer):
         xl = []
         xu = []
         xx = []
-        for key in opt_problem._variables.keys():
-            if opt_problem._variables[key].type == 'c':
-                xl.append(opt_problem._variables[key].lower)
-                xu.append(opt_problem._variables[key].upper)
-                xx.append(opt_problem._variables[key].value)
-            elif opt_problem._variables[key].type == 'i':
+        for key in opt_problem.variables.keys():
+            if opt_problem.variables[key].type == 'c':
+                xl.append(opt_problem.variables[key].lower)
+                xu.append(opt_problem.variables[key].upper)
+                xx.append(opt_problem.variables[key].value)
+            elif opt_problem.variables[key].type == 'i':
                 raise IOError('NLPQL cannot handle integer design variables')
-            elif opt_problem._variables[key].type == 'd':
+            elif opt_problem.variables[key].type == 'd':
                 raise IOError('NLPQL cannot handle discrete design variables')
 
         xl = numpy.array(xl)
@@ -539,21 +541,21 @@ class ALGENCAN(Optimizer):
         group_ids = {}
         if opt_problem.use_groups:
             k = 0
-            for key in opt_problem._vargroups.keys():
-                group_len = len(opt_problem._vargroups[key]['ids'])
-                group_ids[opt_problem._vargroups[key]['name']] = \
+            for key in opt_problem.vargroups.keys():
+                group_len = len(opt_problem.vargroups[key]['ids'])
+                group_ids[opt_problem.vargroups[key]['name']] = \
                     [k, k+group_len]
                 k += group_len
 
         # Constraints Handling
-        m = len(opt_problem._constraints.keys())
+        m = len(opt_problem.constraints.keys())
         equatn = []
         linear = []
         if m > 0:
-            for key in opt_problem._constraints.keys():
-                if opt_problem._constraints[key].type == 'e':
+            for key in opt_problem.constraints.keys():
+                if opt_problem.constraints[key].type == 'e':
                     equatn.append(True)
-                elif opt_problem._constraints[key].type == 'i':
+                elif opt_problem.constraints[key].type == 'i':
                     equatn.append(False)
 
                 linear.append(False)
@@ -566,10 +568,10 @@ class ALGENCAN(Optimizer):
 
         # Objective Handling
         objfunc = opt_problem.obj_fun
-        nobj = len(opt_problem._objectives.keys())
+        nobj = len(opt_problem.objectives.keys())
         ff = []
-        for key in opt_problem._objectives.keys():
-            ff.append(opt_problem._objectives[key].value)
+        for key in opt_problem.objectives.keys():
+            ff.append(opt_problem.objectives[key].value)
 
         ff = numpy.array(ff)
 
@@ -671,20 +673,20 @@ class ALGENCAN(Optimizer):
 
             sol_evals = 0
 
-            sol_vars = copy.deepcopy(opt_problem._variables)
+            sol_vars = copy.deepcopy(opt_problem.variables)
             i = 0
             for key in sol_vars.keys():
                 sol_vars[key].value = xx[i]
                 i += 1
 
-            sol_objs = copy.deepcopy(opt_problem._objectives)
+            sol_objs = copy.deepcopy(opt_problem.objectives)
             i = 0
             for key in sol_objs.keys():
                 sol_objs[key].value = ff[i]
                 i += 1
 
             if m > 0:
-                sol_cons = copy.deepcopy(opt_problem._constraints)
+                sol_cons = copy.deepcopy(opt_problem.constraints)
                 i = 0
                 for key in sol_cons.keys():
                     sol_cons[key].value = gg[i]

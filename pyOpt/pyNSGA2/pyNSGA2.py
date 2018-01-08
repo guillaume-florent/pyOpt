@@ -101,7 +101,7 @@ class NSGA2(Optimizer):
         Optimizer.__init__(self, name, category, def_opts, informs, *args,
                            **kwargs)
 
-    def __solve__(self, opt_problem={}, store_sol=True, disp_opts=False,
+    def __solve__(self, opt_problem, store_sol=True, disp_opts=False,
                   store_hst=False, hot_start=False, *args, **kwargs):
         """Run Optimizer (Optimize Routine)
         
@@ -117,7 +117,8 @@ class NSGA2(Optimizer):
         - hot_start -> BOOL/STR: Flag/filename to read optimization history,
                        *Default* = False
         
-        Additional arguments and keyword arguments are passed to the objective function call.
+        Additional arguments and keyword arguments are passed to the objective
+        function call.
         
         Documentation last updated:  February. 16, 2011 - Peter W. Jansen
 
@@ -198,25 +199,25 @@ class NSGA2(Optimizer):
                     log_file.write(fail, 'fail')
 
             if fail == 1:
-                # Objective Assigment
-                for i in range(len(opt_problem._objectives.keys())):
+                # Objective Assignment
+                for i in range(len(opt_problem.objectives.keys())):
                     f[i] = inf
 
-                # Constraints Assigment
-                for i in range(len(opt_problem._constraints.keys())):
+                # Constraints Assignment
+                for i in range(len(opt_problem.constraints.keys())):
                     g[i] = -inf
             else:
-                # Objective Assigment
-                if len(opt_problem._objectives.keys()) == 1:
+                # Objective Assignment
+                if len(opt_problem.objectives.keys()) == 1:
                     f[0] = ff
                 else:
-                    for i in range(len(opt_problem._objectives.keys())):
+                    for i in range(len(opt_problem.objectives.keys())):
                         if isinstance(ff[i], complex):
                             f[i] = ff[i].astype(float)
                         else:
                             f[i] = ff[i]
-                # Constraints Assigment
-                for i in range(len(opt_problem._constraints.keys())):
+                # Constraints Assignment
+                for i in range(len(opt_problem.constraints.keys())):
                     if isinstance(gg[i], complex):
                         g[i] = -gg[i].astype(float)
                     else:
@@ -225,23 +226,23 @@ class NSGA2(Optimizer):
             return f, g
 
         # Variables Handling
-        n = len(opt_problem._variables.keys())
+        n = len(opt_problem.variables.keys())
         x = nsga2.new_doubleArray(n)
         xl = nsga2.new_doubleArray(n)
         xu = nsga2.new_doubleArray(n)
         i = 0
-        for key in opt_problem._variables.keys():
-            if opt_problem._variables[key].type == 'c':
+        for key in opt_problem.variables.keys():
+            if opt_problem.variables[key].type == 'c':
                 nsga2.doubleArray_setitem(x, i,
-                                          opt_problem._variables[key].value)
+                                          opt_problem.variables[key].value)
                 nsga2.doubleArray_setitem(xl, i,
-                                          opt_problem._variables[key].lower)
+                                          opt_problem.variables[key].lower)
                 nsga2.doubleArray_setitem(xu, i,
-                                          opt_problem._variables[key].upper)
-            elif opt_problem._variables[key].type == 'i':
+                                          opt_problem.variables[key].upper)
+            elif opt_problem.variables[key].type == 'i':
                 raise IOError('Current NSGA-II cannot handle integer '
                               'design variables')
-            elif opt_problem._variables[key].type == 'd':
+            elif opt_problem.variables[key].type == 'd':
                 raise IOError('Current NSGA-II cannot handle discrete '
                               'design variables')
             i += 1
@@ -250,32 +251,32 @@ class NSGA2(Optimizer):
         if opt_problem.use_groups:
             group_ids = {}
             k = 0
-            for key in opt_problem._vargroups.keys():
-                group_len = len(opt_problem._vargroups[key]['ids'])
-                group_ids[opt_problem._vargroups[key]['name']] = [k,
-                                                                  k + group_len]
+            for key in opt_problem.vargroups.keys():
+                group_len = len(opt_problem.vargroups[key]['ids'])
+                group_ids[opt_problem.vargroups[key]['name']] = [k,
+                                                                 k + group_len]
                 k += group_len
 
         # Constraints Handling
-        m = len(opt_problem._constraints.keys())
+        m = len(opt_problem.constraints.keys())
         me = 0
         g = nsga2.new_doubleArray(m)
         # j = 0
         if m > 0:
-            for key in opt_problem._constraints.keys():
-                if opt_problem._constraints[key].type == 'e':
+            for key in opt_problem.constraints.keys():
+                if opt_problem.constraints[key].type == 'e':
                     raise IOError('Current NSGA-II cannot handle '
                                   'equality constraints')
-                # nsga2.doubleArray_setitem(g,j,opt_problem._constraints[key].value)
+                # nsga2.doubleArray_setitem(g,j,opt_problem.constraints[key].value)
                 # j += 1
 
         # Objective Handling
         objfunc = opt_problem.obj_fun
-        l = len(opt_problem._objectives.keys())
+        l = len(opt_problem.objectives.keys())
         f = nsga2.new_doubleArray(l)
         # k = 0
-        # for key in opt_problem._objectives.keys():
-        #   nsga2.doubleArray_setitem(f,k,opt_problem._objectives[key].value)
+        # for key in opt_problem.objectives.keys():
+        #   nsga2.doubleArray_setitem(f,k,opt_problem.objectives[key].value)
         #   k += 1
 
         # Setup argument list values
@@ -344,20 +345,20 @@ class NSGA2(Optimizer):
 
             sol_evals = nfeval
 
-            sol_vars = copy.deepcopy(opt_problem._variables)
+            sol_vars = copy.deepcopy(opt_problem.variables)
             i = 0
             for key in sol_vars.keys():
                 sol_vars[key].value = nsga2.doubleArray_getitem(x, i)
                 i += 1
 
-            sol_objs = copy.deepcopy(opt_problem._objectives)
+            sol_objs = copy.deepcopy(opt_problem.objectives)
             i = 0
             for key in sol_objs.keys():
                 sol_objs[key].value = nsga2.doubleArray_getitem(f, i)
                 i += 1
 
             if m > 0:
-                sol_cons = copy.deepcopy(opt_problem._constraints)
+                sol_cons = copy.deepcopy(opt_problem.constraints)
                 i = 0
                 for key in sol_cons.keys():
                     sol_cons[key].value = -nsga2.doubleArray_getitem(g, i)

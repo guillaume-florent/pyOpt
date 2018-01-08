@@ -100,9 +100,11 @@ class MIDACO(Optimizer):
             # Oracle parameter for constrained problems
             # (0 - Use internal default)
             'ORACLE': [float, 0],
-            # Focus of MIDACO search process around best solution (0 - Use internal default)
+            # Focus of MIDACO search process around best solution
+            # (0 - Use internal default)
             'FOCUS': [int, 0],
-            # Number of iterates (ants) per generation (0 - Use internal default)
+            # Number of iterates (ants) per generation
+            # (0 - Use internal default)
             'ANTS': [int, 0],
             # Size of the solution archive (0 - Use internal default)
             'KERNEL': [int, 0],
@@ -123,24 +125,36 @@ class MIDACO(Optimizer):
             'IOUT2': [int, 37],  # Best solution output unit number
             'IFILE1': [str, 'MIDACO_HIST.out'],  # History output file name
             'IFILE2': [str, 'MIDACO_BEST.out'],  # Best output file name
-            'LKEY': [str,
-                     'MIDACO_LIMITED_VERSION___[CREATIVE_COMMONS_BY-NC-ND_LICENSE]'],
+            'LKEY': [str, 'MIDACO_LIMITED_VERSION___'
+                          '[CREATIVE_COMMONS_BY-NC-ND_LICENSE]'],
         }
         informs = {
-            1: 'Feasible solution,   MIDACO was stopped by the user submitting ISTOP=1',
-            2: 'Infeasible solution, MIDACO was stopped by the user submitting ISTOP=1',
-            3: 'Feasible solution,   MIDACO stopped automatically using AUTOSTOP option',
-            4: 'Infeasible solution,   MIDACO stopped automatically using AUTOSTOP option',
+            1: 'Feasible solution,   MIDACO was stopped by the user '
+               'submitting ISTOP=1',
+            2: 'Infeasible solution, MIDACO was stopped by the user '
+               'submitting ISTOP=1',
+            3: 'Feasible solution,   MIDACO stopped automatically '
+               'using AUTOSTOP option',
+            4: 'Infeasible solution,   MIDACO stopped automatically '
+               'using AUTOSTOP option',
             5: 'Feasible solution,   MIDACO stopped automatically by FSTOP',
-            51: 'WARNING: Some X(i)  is greater/lower than +/- 1.0D+12 (try to avoid huge values!)',
-            52: 'WARNING: Some XL(i) is greater/lower than +/- 1.0D+12 (try to avoid huge values!)',
-            53: 'WARNING: Some XU(i) is greater/lower than +/- 1.0D+12 (try to avoid huge values!)',
-            61: 'WARNING: Some X(i)  should be discrete (e.g. 1.000) , but is continuous (e.g. 1.234)',
-            62: 'WARNING: Some XL(i) should be discrete (e.g. 1.000) , but is continuous (e.g. 1.234)',
-            63: 'WARNING: Some XU(i) should be discrete (e.g. 1.000) , but is continuous (e.g. 1.234)',
+            51: 'WARNING: Some X(i)  is greater/lower than +/- 1.0D+12 '
+                '(try to avoid huge values!)',
+            52: 'WARNING: Some XL(i) is greater/lower than +/- 1.0D+12 '
+                '(try to avoid huge values!)',
+            53: 'WARNING: Some XU(i) is greater/lower than +/- 1.0D+12 '
+                '(try to avoid huge values!)',
+            61: 'WARNING: Some X(i)  should be discrete (e.g. 1.000) , '
+                'but is continuous (e.g. 1.234)',
+            62: 'WARNING: Some XL(i) should be discrete (e.g. 1.000) , '
+                'but is continuous (e.g. 1.234)',
+            63: 'WARNING: Some XU(i) should be discrete (e.g. 1.000) , '
+                'but is continuous (e.g. 1.234)',
             71: 'WARNING: Some XL(i) = XU(I) (fixed variable)',
-            81: 'WARNING: F(X) has value NaN for starting point X (sure your problem is correct?)',
-            82: 'WARNING: Some G(X) has value NaN for starting point X (sure your problem is correct?)',
+            81: 'WARNING: F(X) has value NaN for starting point X '
+                '(sure your problem is correct?)',
+            82: 'WARNING: Some G(X) has value NaN for starting point X '
+                '(sure your problem is correct?)',
             91: 'WARNING: FSTOP is greater/lower than +/- 1.0D+8',
             92: 'WARNING: ORACLE is greater/lower than +/- 1.0D+8',
             101: 'ERROR: L    <= 0 or L > 1.0D+6',
@@ -170,18 +184,25 @@ class MIDACO(Optimizer):
             312: 'ERROR: CHARACTER < 0   or   CHARACTER > 1000',
             313: 'ERROR: some MIDACO parameters has type NaN',
             401: 'ERROR: ISTOP < 0 or ISTOP > 1',
-            501: 'ERROR: Double precision work space size LRW is too small (see below LRW), RW must be at least of size LRW = 200*N+2*M+1000',
-            601: 'ERROR: Integer work space size LIW is too small (see below LIW), IW must be at least of size LIW = 2*N+L+100',
-            701: 'ERROR: Input check failed! MIDACO must be called initially with IFAIL = 0',
-            801: 'ERROR: L > LMAX (user must specifiy LMAX below in the MIDACO source code)',
-            802: 'ERROR: L*M+1 > LXM (user must specifiy LXM below in the MIDACO source code)',
+            501: 'ERROR: Double precision work space size LRW is too small '
+                 '(see below LRW), RW must be at least '
+                 'of size LRW = 200*N+2*M+1000',
+            601: 'ERROR: Integer work space size LIW is too small '
+                 '(see below LIW), IW must be at least of size LIW = 2*N+L+100',
+            701: 'ERROR: Input check failed! MIDACO must be called '
+                 'initially with IFAIL = 0',
+            801: 'ERROR: L > LMAX (user must specify LMAX below in the '
+                 'MIDACO source code)',
+            802: 'ERROR: L*M+1 > LXM (user must specify LXM below in the '
+                 'MIDACO source code)',
             900: 'ERROR: Invalid or corrupted LICENSE_KEY',
-            999: 'ERROR: N > 4. The free test version is limited up to 4 variables',
+            999: 'ERROR: N > 4. The free test version is limited '
+                 'up to 4 variables',
         }
         Optimizer.__init__(self, name, category, def_opts, informs, *args,
                            **kwargs)
 
-    def __solve__(self, opt_problem={}, store_sol=True, disp_opts=False,
+    def __solve__(self, opt_problem, store_sol=True, disp_opts=False,
                   store_hst=False, hot_start=False, *args, **kwargs):
         """Run Optimizer (Optimize Routine)
         
@@ -298,9 +319,9 @@ class MIDACO(Optimizer):
                 if fail == 1:
                     # Objective Assignment
                     f[mxi] = inf
-                    # Constraints Assigment (negative gg
+                    # Constraints Assignment (negative gg
                     # as midaco uses g(x) >= 0)
-                    for i in range(len(opt_problem._constraints.keys())):
+                    for i in range(len(opt_problem.constraints.keys())):
                         g[mxi, i] = -inf
                 else:
                     # Objective Assignment
@@ -309,9 +330,9 @@ class MIDACO(Optimizer):
                     else:
                         f[mxi] = ff
 
-                    # Constraints Assigment (negative gg
+                    # Constraints Assignment (negative gg
                     # as midaco uses g(x) >= 0)
-                    for i in range(len(opt_problem._constraints.keys())):
+                    for i in range(len(opt_problem.constraints.keys())):
                         if isinstance(gg[i], complex):
                             g[mxi, i] = -gg[i].astype(float)
                         else:
@@ -350,18 +371,18 @@ class MIDACO(Optimizer):
             return f, g
 
         # Variables Handling
-        nvar = len(opt_problem._variables.keys())
+        nvar = len(opt_problem.variables.keys())
         nint = 0
         xl = []
         xu = []
         xx = []
-        for key in opt_problem._variables.keys():
-            if opt_problem._variables[key].type == 'i':
+        for key in opt_problem.variables.keys():
+            if opt_problem.variables[key].type == 'i':
                 nint += 1
 
-            xl.append(opt_problem._variables[key].lower)
-            xu.append(opt_problem._variables[key].upper)
-            xx.append(opt_problem._variables[key].value)
+            xl.append(opt_problem.variables[key].lower)
+            xu.append(opt_problem.variables[key].upper)
+            xx.append(opt_problem.variables[key].value)
 
         xl = numpy.array(xl)
         xu = numpy.array(xu)
@@ -371,21 +392,21 @@ class MIDACO(Optimizer):
         if opt_problem.use_groups:
             group_ids = {}
             k = 0
-            for key in opt_problem._vargroups.keys():
-                group_len = len(opt_problem._vargroups[key]['ids'])
-                group_ids[opt_problem._vargroups[key]['name']] = [k,
-                                                                  k + group_len]
+            for key in opt_problem.vargroups.keys():
+                group_len = len(opt_problem.vargroups[key]['ids'])
+                group_ids[opt_problem.vargroups[key]['name']] = [k,
+                                                                 k + group_len]
                 k += group_len
 
         # Constraints Handling
-        ncon = len(opt_problem._constraints.keys())
+        ncon = len(opt_problem.constraints.keys())
         neqc = 0
         gg = []
         if ncon > 0:
-            for key in opt_problem._constraints.keys():
-                if opt_problem._constraints[key].type == 'e':
+            for key in opt_problem.constraints.keys():
+                if opt_problem.constraints[key].type == 'e':
                     neqc += 1
-                gg.append(opt_problem._constraints[key].value)
+                gg.append(opt_problem.constraints[key].value)
         else:
             ncon = 1
             gg.append(0.0)
@@ -394,11 +415,11 @@ class MIDACO(Optimizer):
 
         # Objective Handling
         objfunc = opt_problem.obj_fun
-        nobj = len(opt_problem._objectives.keys())
+        nobj = len(opt_problem.objectives.keys())
 
         ff = []
-        for key in opt_problem._objectives.keys():
-            ff.append(opt_problem._objectives[key].value)
+        for key in opt_problem.objectives.keys():
+            ff.append(opt_problem.objectives[key].value)
 
         ff = numpy.array(ff * nproc)
 
@@ -500,20 +521,20 @@ class MIDACO(Optimizer):
 
             sol_evals = neval
 
-            sol_vars = copy.deepcopy(opt_problem._variables)
+            sol_vars = copy.deepcopy(opt_problem.variables)
             i = 0
             for key in sol_vars.keys():
                 sol_vars[key].value = xx[i]
                 i += 1
 
-            sol_objs = copy.deepcopy(opt_problem._objectives)
+            sol_objs = copy.deepcopy(opt_problem.objectives)
             i = 0
             for key in sol_objs.keys():
                 sol_objs[key].value = ff[i]
                 i += 1
 
             if ncon > 0:
-                sol_cons = copy.deepcopy(opt_problem._constraints)
+                sol_cons = copy.deepcopy(opt_problem.constraints)
                 i = 0
                 for key in sol_cons.keys():
                     sol_cons[key].value = gg[i]

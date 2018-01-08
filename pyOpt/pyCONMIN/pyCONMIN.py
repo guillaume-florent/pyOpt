@@ -98,14 +98,13 @@ class CONMIN(Optimizer):
         Optimizer.__init__(self, name, category, def_opts, informs, *args,
                            **kwargs)
 
-    def __solve__(self, opt_problem={}, sens_type='FD', store_sol=True,
+    def __solve__(self, opt_problem, sens_type='FD', store_sol=True,
                   store_hst=False, hot_start=False, disp_opts=False,
                   sens_mode='', sens_step={}, *args, **kwargs):
-
         """Run Optimizer (Optimize Routine)
-        
+
         **Keyword arguments:**
-        
+
         - opt_problem -> INST: Optimization instance
         - sens_type -> STR/FUNC: Gradient type, *Default* = 'FD' 
         - store_sol -> BOOL: Store solution in Optimization class flag,
@@ -120,10 +119,10 @@ class CONMIN(Optimizer):
                        *Default* = ''
         - sens_step -> FLOAT: Sensitivity setp size,
                        *Default* = {} [corresponds to 1e-6 (FD), 1e-20(CS)]
-        
+
         Additional arguments and keyword arguments are passed to
         the objective function call
-        
+
         Documentation last updated:  February. 2, 2011 - Ruben E. Perez
 
         """
@@ -137,7 +136,8 @@ class CONMIN(Optimizer):
                 import mpi4py
                 from mpi4py import MPI
             except ImportError:
-                print('pyCONMIN: Parallel objective Function Analysis requires mpi4py')
+                print('pyCONMIN: Parallel objective Function Analysis '
+                      'requires mpi4py')
 
             comm = MPI.COMM_WORLD
             nproc = comm.Get_size()
@@ -221,7 +221,7 @@ class CONMIN(Optimizer):
                 f = ff
 
             # Constraints Assignment
-            for i in range(len(opt_problem._constraints.keys())):
+            for i in range(len(opt_problem.constraints.keys())):
                 if isinstance(gg[i], complex):
                     g[i] = gg[i].astype(float)
                 else:
@@ -234,8 +234,8 @@ class CONMIN(Optimizer):
         # ======================================================================
         def cnmngrd(n1, n2, x, f, g, ct, df, a, ic, nac):
             nac = 0
-            for j in range(len(opt_problem._constraints.keys())):
-                if (g[j] >= ct):
+            for j in range(len(opt_problem.constraints.keys())):
+                if g[j] >= ct:
                     ic[nac] = j + 1
                     nac += 1
 
@@ -250,11 +250,11 @@ class CONMIN(Optimizer):
                         hos_file.close()
                     else:
                         dff = vals['grad_obj'][0].reshape((len(
-                            opt_problem._objectives.keys()), len(
-                            opt_problem._variables.keys())))
+                            opt_problem.objectives.keys()), len(
+                            opt_problem.variables.keys())))
                         dgg = vals['grad_con'][0].reshape((len(
-                            opt_problem._constraints.keys()), len(
-                            opt_problem._variables.keys())))
+                            opt_problem.constraints.keys()), len(
+                            opt_problem.variables.keys())))
 
                 if self.pll:
                     self.h_start = Bcast(self.h_start, root=0)
@@ -264,7 +264,7 @@ class CONMIN(Optimizer):
 
             if not self.h_start:
                 dff, dgg = gradient.getGrad(x, group_ids, [f], g[0:len(
-                    opt_problem._constraints.keys())], *args, **kwargs)
+                    opt_problem.constraints.keys())], *args, **kwargs)
 
             # Store History
             if self.sto_hst and (myrank == 0):
@@ -272,9 +272,9 @@ class CONMIN(Optimizer):
                 log_file.write(dgg, 'grad_con')
 
             # Gradient Assignment
-            for i in range(len(opt_problem._variables.keys())):
+            for i in range(len(opt_problem.variables.keys())):
                 df[i] = dff[0, i]
-                for j in range(len(opt_problem._constraints.keys())):
+                for j in range(len(opt_problem.constraints.keys())):
                     for k in range(nac):
                         if ic[k] == j + 1:
                             a[i, k] = dgg[j, i]
@@ -282,18 +282,18 @@ class CONMIN(Optimizer):
             return df, a, ic, nac
 
         # Variables Handling
-        nvar = len(opt_problem._variables.keys())
+        nvar = len(opt_problem.variables.keys())
         xl = []
         xu = []
         xx = []
-        for key in opt_problem._variables.keys():
-            if opt_problem._variables[key].type == 'c':
-                xl.append(opt_problem._variables[key].lower)
-                xu.append(opt_problem._variables[key].upper)
-                xx.append(opt_problem._variables[key].value)
-            elif opt_problem._variables[key].type == 'i':
+        for key in opt_problem.variables.keys():
+            if opt_problem.variables[key].type == 'c':
+                xl.append(opt_problem.variables[key].lower)
+                xu.append(opt_problem.variables[key].upper)
+                xx.append(opt_problem.variables[key].value)
+            elif opt_problem.variables[key].type == 'i':
                 raise IOError('CONMIN cannot handle integer design variables')
-            elif opt_problem._variables[key].type == 'd':
+            elif opt_problem.variables[key].type == 'd':
                 raise IOError('CONMIN cannot handle discrete design variables')
 
         xl = numpy.array(xl)
@@ -304,32 +304,32 @@ class CONMIN(Optimizer):
         group_ids = {}
         if opt_problem.use_groups:
             k = 0
-            for key in opt_problem._vargroups.keys():
-                group_len = len(opt_problem._vargroups[key]['ids'])
-                group_ids[opt_problem._vargroups[key]['name']] = [k,
-                                                                  k + group_len]
+            for key in opt_problem.vargroups.keys():
+                group_len = len(opt_problem.vargroups[key]['ids'])
+                group_ids[opt_problem.vargroups[key]['name']] = [k,
+                                                                 k + group_len]
                 k += group_len
 
         # Constraints Handling
-        ncon = len(opt_problem._constraints.keys())
+        ncon = len(opt_problem.constraints.keys())
         # neqc = 0
         # gg = []
         if ncon > 0:
-            for key in opt_problem._constraints.keys():
-                if opt_problem._constraints[key].type == 'e':
+            for key in opt_problem.constraints.keys():
+                if opt_problem.constraints[key].type == 'e':
                     raise IOError('CONMIN cannot handle equality constraints')
                 # neqc += 1
 
-                # gg.append(opt_problem._constraints[key].value)
+                # gg.append(opt_problem.constraints[key].value)
 
         # gg = numpy.array(gg)
 
         # Objective Handling
         objfunc = opt_problem.obj_fun
-        nobj = len(opt_problem._objectives.keys())
+        nobj = len(opt_problem.objectives.keys())
         ff = []
-        for key in opt_problem._objectives.keys():
-            ff.append(opt_problem._objectives[key].value)
+        for key in opt_problem.objectives.keys():
+            ff.append(opt_problem.objectives[key].value)
 
         ff = numpy.array(ff, numpy.float)
 
@@ -415,20 +415,20 @@ class CONMIN(Optimizer):
 
             sol_evals = nfun[0] + ngrd[0] * nvar
 
-            sol_vars = copy.deepcopy(opt_problem._variables)
+            sol_vars = copy.deepcopy(opt_problem.variables)
             i = 0
             for key in sol_vars.keys():
                 sol_vars[key].value = xx[i]
                 i += 1
 
-            sol_objs = copy.deepcopy(opt_problem._objectives)
+            sol_objs = copy.deepcopy(opt_problem.objectives)
             i = 0
             for key in sol_objs.keys():
                 sol_objs[key].value = ff[i]
                 i += 1
 
             if ncon > 0:
-                sol_cons = copy.deepcopy(opt_problem._constraints)
+                sol_cons = copy.deepcopy(opt_problem.constraints)
                 i = 0
                 for key in sol_cons.keys():
                     sol_cons[key].value = gg[i]

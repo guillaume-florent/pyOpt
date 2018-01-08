@@ -94,33 +94,39 @@ class NLPQLP(Optimizer):
             'IFILE': [str, 'NLPQLP.out'],  # Output File Name
         }
         informs = {
-            -2: 'Compute gradient values w.r.t. the variables stored in' \
-                ' first column of X, and store them in DF and DG.' \
-                ' Only derivatives for active constraints ACTIVE(J)=.TRUE. need to be computed.',
-            -1: 'Compute objective fn and all constraint values subject' \
-                'the variables found in the first L columns of X, and store them in F and G.',
+            -2: 'Compute gradient values w.r.t. the variables stored in'
+                ' first column of X, and store them in DF and DG.'
+                ' Only derivatives for active constraints ACTIVE(J)=.TRUE. '
+                'need to be computed.',
+            -1: 'Compute objective fn and all constraint values subject'
+                'the variables found in the first L columns of X, and store '
+                'them in F and G.',
             0: 'The optimality conditions are satisfied.',
             1: ' The algorithm has been stopped after MAXIT iterations.',
             2: ' The algorithm computed an uphill search direction.',
-            3: ' Underflow occurred when determining a new approximation matrix' \
+            3: ' Underflow occurred when determining a new approximation matrix'
                'for the Hessian of the Lagrangian.',
             4: 'The line search could not be terminated successfully.',
-            5: 'Length of a working array is too short.' \
+            5: 'Length of a working array is too short.'
                ' More detailed error information is obtained with IPRINT>0',
-            6: 'There are false dimensions, for example M>MMAX, N>=NMAX, or MNN2<>M+N+N+2.',
-            7: 'The search direction is close to zero, but the current iterate is still infeasible.',
+            6: 'There are false dimensions, for example M>MMAX, N>=NMAX, '
+               'or MNN2<>M+N+N+2.',
+            7: 'The search direction is close to zero, but the current iterate '
+               'is still infeasible.',
             8: 'The starting point violates a lower or upper bound.',
-            9: 'Wrong input parameter, i.e., MODE, LDL decomposition in D and C' \
+            9: 'Wrong input parameter, i.e., MODE, LDL decomposition in D and C'
                ' (in case of MODE=1), IPRINT, IOUT',
-            10: 'Internal inconsistency of the quadratic subproblem, division by zero.',
-            100: 'The solution of the quadratic programming subproblem has been' \
-                 ' terminated with an error message and IFAIL is set to IFQL+100,' \
-                 ' where IFQL denotes the index of an inconsistent constraint.',
+            10: 'Internal inconsistency of the quadratic subproblem, '
+                'division by zero.',
+            100: 'The solution of the quadratic programming subproblem has been'
+                 ' terminated with an error message and IFAIL is set to '
+                 'IFQL+100, where IFQL denotes the index of an '
+                 'inconsistent constraint.',
         }
         Optimizer.__init__(self, name, category, def_opts, informs, *args,
                            **kwargs)
 
-    def __solve__(self, opt_problem={}, sens_type='FD', store_sol=True,
+    def __solve__(self, opt_problem, sens_type='FD', store_sol=True,
                   store_hst=False, hot_start=False, disp_opts=False,
                   sens_mode='', sens_step={}, *args, **kwargs):
         """Run Optimizer (Optimize Routine)
@@ -247,14 +253,14 @@ class NLPQLP(Optimizer):
             elif not self.h_start:
                 [ff, gg, fail] = opt_problem.obj_fun(xn, *args, **kwargs)
 
-                # Objective Assigment
+                # Objective Assignment
                 if isinstance(ff, complex):
                     f[mxi] = ff.astype(float)
                 else:
                     f[mxi] = ff
 
-                # Constraints Assigment (negative gg as nlpqlp uses g(x) >= 0)
-                for i in range(len(opt_problem._constraints.keys())):
+                # Constraints Assignment (negative gg as nlpqlp uses g(x) >= 0)
+                for i in range(len(opt_problem.constraints.keys())):
                     if isinstance(gg[i], complex):
                         g[i, mxi] = -gg[i].astype(float)
                     else:
@@ -304,11 +310,11 @@ class NLPQLP(Optimizer):
                         hos_file.close()
                     else:
                         dff = vals['grad_obj'][0].reshape((len(
-                            opt_problem._objectives.keys()), len(
-                            opt_problem._variables.keys())))
+                            opt_problem.objectives.keys()), len(
+                            opt_problem.variables.keys())))
                         dgg = vals['grad_con'][0].reshape((len(
-                            opt_problem._constraints.keys()), len(
-                            opt_problem._variables.keys())))
+                            opt_problem.constraints.keys()), len(
+                            opt_problem.variables.keys())))
 
                 if self.pll:
                     self.h_start = Bcast(self.h_start, root=0)
@@ -320,7 +326,7 @@ class NLPQLP(Optimizer):
                 dff, dgg = gradient.getGrad(x[:-1, 0],
                                             group_ids,
                                             [f[0]],
-                                            -g[0:len(opt_problem._constraints.keys()), 0],
+                                            -g[0:len(opt_problem.constraints.keys()), 0],
                                             *args,
                                             **kwargs)
 
@@ -330,28 +336,28 @@ class NLPQLP(Optimizer):
                 log_file.write(dgg, 'grad_con')
 
             # Gradient Assignment
-            for i in range(len(opt_problem._variables.keys())):
+            for i in range(len(opt_problem.variables.keys())):
                 df[i] = dff[0, i]
-                for j in range(len(opt_problem._constraints.keys())):
+                for j in range(len(opt_problem.constraints.keys())):
                     dg[j, i] = -dgg[j, i]
 
             return df, dg
 
         # Variables Handling
-        nvar = len(opt_problem._variables.keys())
+        nvar = len(opt_problem.variables.keys())
         xl = numpy.zeros([max(2, nvar + 1)], numpy.float)
         xu = numpy.zeros([max(2, nvar + 1)], numpy.float)
         xx = numpy.zeros([max(2, nvar + 1), nproc], numpy.float)
         i = 0
-        for key in opt_problem._variables.keys():
-            if opt_problem._variables[key].type == 'c':
-                xl[i] = opt_problem._variables[key].lower
-                xu[i] = opt_problem._variables[key].upper
+        for key in opt_problem.variables.keys():
+            if opt_problem.variables[key].type == 'c':
+                xl[i] = opt_problem.variables[key].lower
+                xu[i] = opt_problem.variables[key].upper
                 for proc in range(nproc):
-                    xx[i, proc] = opt_problem._variables[key].value
-            elif opt_problem._variables[key].type == 'i':
+                    xx[i, proc] = opt_problem.variables[key].value
+            elif opt_problem.variables[key].type == 'i':
                 raise IOError('NLPQLP cannot handle integer design variables')
-            elif opt_problem._variables[key].type == 'd':
+            elif opt_problem.variables[key].type == 'd':
                 raise IOError('NLPQLP cannot handle discrete design variables')
             i += 1
 
@@ -359,36 +365,36 @@ class NLPQLP(Optimizer):
         group_ids = {}
         if opt_problem.use_groups:
             k = 0
-            for key in opt_problem._vargroups.keys():
-                group_len = len(opt_problem._vargroups[key]['ids'])
-                group_ids[opt_problem._vargroups[key]['name']] = [k,
+            for key in opt_problem.vargroups.keys():
+                group_len = len(opt_problem.vargroups[key]['ids'])
+                group_ids[opt_problem.vargroups[key]['name']] = [k,
                                                                   k + group_len]
                 k += group_len
 
         # Constraints Handling
-        ncon = len(opt_problem._constraints.keys())
+        ncon = len(opt_problem.constraints.keys())
         neqc = 0
         gg = numpy.zeros([ncon, nproc], numpy.float)
         if ncon > 0:
             i = 0
-            for key in opt_problem._constraints.keys():
-                if opt_problem._constraints[key].type == 'e':
+            for key in opt_problem.constraints.keys():
+                if opt_problem.constraints[key].type == 'e':
                     neqc += 1
                 if self.pll is False:
-                    gg[i, 0] = opt_problem._constraints[key].value
+                    gg[i, 0] = opt_problem.constraints[key].value
                 else:
                     for proc in range(nproc):
-                        gg[i, proc] = opt_problem._constraints[key].value
+                        gg[i, proc] = opt_problem.constraints[key].value
                 i += 1
 
         # Objective Handling
         objfunc = opt_problem.obj_fun
-        if len(opt_problem._objectives.keys()) > 1:
+        if len(opt_problem.objectives.keys()) > 1:
             raise IOError('NLPQLP cannot handle multi-objective problems')
 
         ff = []
-        for key in opt_problem._objectives.keys():
-            ff.append(opt_problem._objectives[key].value)
+        for key in opt_problem.objectives.keys():
+            ff.append(opt_problem.objectives[key].value)
 
         ff = numpy.array(ff * nproc, numpy.float)
 
@@ -493,20 +499,20 @@ class NLPQLP(Optimizer):
 
             sol_evals = nfun + ngrd * nvar
 
-            sol_vars = copy.deepcopy(opt_problem._variables)
+            sol_vars = copy.deepcopy(opt_problem.variables)
             i = 0
             for key in sol_vars.keys():
                 sol_vars[key].value = xx[i, 0]
                 i += 1
 
-            sol_objs = copy.deepcopy(opt_problem._objectives)
+            sol_objs = copy.deepcopy(opt_problem.objectives)
             i = 0
             for key in sol_objs.keys():
                 sol_objs[key].value = ff[0]
                 i += 1
 
             if ncon > 0:
-                sol_cons = copy.deepcopy(opt_problem._constraints)
+                sol_cons = copy.deepcopy(opt_problem.constraints)
                 i = 0
                 for key in sol_cons.keys():
                     sol_cons[key].value = -gg[i, 0]

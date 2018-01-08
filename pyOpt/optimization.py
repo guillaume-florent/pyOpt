@@ -130,6 +130,10 @@ class Optimization(object):
     def solutions(self):
         return self._solutions
 
+    @property
+    def vargroups(self):
+        return self._vargroups
+
     def getVar(self, i):
         """Get Variable *i* from Variables Set
         

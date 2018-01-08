@@ -199,7 +199,7 @@ class ALPSO(Optimizer):
             self.myrank = 0
 
     def __solve__(self,
-                  opt_problem={},
+                  opt_problem,
                   store_sol=True,
                   disp_opts=False,
                   xstart=[],
@@ -264,12 +264,12 @@ class ALPSO(Optimizer):
             [ff, gg, fail] = opt_problem.obj_fun(xn, *args, **kwargs)
 
             #
-            g = numpy.zeros(len(opt_problem._constraints.keys()), float)
+            g = numpy.zeros(len(opt_problem.constraints.keys()), float)
             if fail == 1:
                 # Objective Assignment
                 f = inf
                 # Constraints Assignment
-                for i in range(len(opt_problem._constraints.keys())):
+                for i in range(len(opt_problem.constraints.keys())):
                     g[i] = inf
 
             else:
@@ -280,7 +280,7 @@ class ALPSO(Optimizer):
                     f = ff
 
                 # Constraints Assigment
-                for i in range(len(opt_problem._constraints.keys())):
+                for i in range(len(opt_problem.constraints.keys())):
                     if isinstance(gg[i], complex):
                         g[i] = gg[i].astype(float)
                     else:
@@ -289,15 +289,15 @@ class ALPSO(Optimizer):
             return f, g
 
         # Variables Handling
-        n = len(opt_problem._variables.keys())
+        n = len(opt_problem.variables.keys())
         xl = numpy.zeros(n, float)
         xu = numpy.zeros(n, float)
         type = numpy.zeros(n, int)
         i = 0
-        for key in opt_problem._variables.keys():
-            xl[i] = opt_problem._variables[key].lower
-            xu[i] = opt_problem._variables[key].upper
-            if opt_problem._variables[key].type == 'c':
+        for key in opt_problem.variables.keys():
+            xl[i] = opt_problem.variables[key].lower
+            xu[i] = opt_problem.variables[key].upper
+            if opt_problem.variables[key].type == 'c':
                 type[i] = 0
             else:
                 type[i] = 1
@@ -308,26 +308,26 @@ class ALPSO(Optimizer):
         if opt_problem.use_groups:
             group_ids = {}
             k = 0
-            for key in opt_problem._vargroups.keys():
-                group_len = len(opt_problem._vargroups[key]['ids'])
-                group_ids[opt_problem._vargroups[key]['name']] = [k,
+            for key in opt_problem.vargroups.keys():
+                group_len = len(opt_problem.vargroups[key]['ids'])
+                group_ids[opt_problem.vargroups[key]['name']] = [k,
                                                                   k + group_len]
                 k += group_len
 
         # Constraints Handling
-        m = len(opt_problem._constraints.keys())
+        m = len(opt_problem.constraints.keys())
         me = 0
         # i = 0
         if m > 0:
-            for key in opt_problem._constraints.keys():
-                if opt_problem._constraints[key].type == 'e':
+            for key in opt_problem.constraints.keys():
+                if opt_problem.constraints[key].type == 'e':
                     me += 1
 
                 # i += 1
 
         # Objective Handling
         objfunc = opt_problem.obj_fun
-        nobj = len(opt_problem._objectives.keys())
+        nobj = len(opt_problem.objectives.keys())
 
         # Setup argument list values
         nob = self.options['SwarmSize'][1]
@@ -391,8 +391,8 @@ class ALPSO(Optimizer):
         xs = []
         if xinit == 1:
             xst = []
-            for key in opt_problem._variables.keys():
-                xst.append(opt_problem._variables[key].value)
+            for key in opt_problem.variables.keys():
+                xst.append(opt_problem.variables[key].value)
 
             xst = numpy.array(xst)
             if xstart == []:
@@ -443,20 +443,20 @@ class ALPSO(Optimizer):
             # sol_inform['value'] = inform
             # sol_inform['text'] = self.getInform(inform)
 
-            sol_vars = copy.deepcopy(opt_problem._variables)
+            sol_vars = copy.deepcopy(opt_problem.variables)
             i = 0
             for key in sol_vars.keys():
                 sol_vars[key].value = opt_x[i]
                 i += 1
 
-            sol_objs = copy.deepcopy(opt_problem._objectives)
+            sol_objs = copy.deepcopy(opt_problem.objectives)
             i = 0
             for key in sol_objs.keys():
                 sol_objs[key].value = opt_f  # Note: takes only one!
                 i += 1
 
             if m > 0:
-                sol_cons = copy.deepcopy(opt_problem._constraints)
+                sol_cons = copy.deepcopy(opt_problem.constraints)
                 i = 0
                 for key in sol_cons.keys():
                     sol_cons[key].value = opt_g[i]

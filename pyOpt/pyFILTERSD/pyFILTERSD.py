@@ -102,7 +102,8 @@ class FILTERSD(Optimizer):
             0: 'successful run',
             1: 'unbounded NLP (f <= fmin at an htol-feasible point)',
             2: 'bounds on x are inconsistent',
-            3: 'local minimum of feasibility problem and h > htol, (nonlinear constraints are locally inconsistent)',
+            3: 'local minimum of feasibility problem and h > htol, '
+               '(nonlinear constraints are locally inconsistent)',
             4: 'initial point x has h > ubd (reset ubd or x and re-enter)',
             5: 'maxit major iterations have been carried out',
             6: 'termination with rho <= htol',
@@ -114,13 +115,13 @@ class FILTERSD(Optimizer):
         Optimizer.__init__(self, name, category, def_opts, informs, *args,
                            **kwargs)
 
-    def __solve__(self, opt_problem={}, sens_type='FD', store_sol=True,
+    def __solve__(self, opt_problem, sens_type='FD', store_sol=True,
                   store_hst=False, hot_start=False, disp_opts=False,
                   sens_mode='', sens_step={}, *args, **kwargs):
         """Run Optimizer (Optimize Routine)
-        
+
         **Keyword arguments:**
-        
+
         - opt_problem -> INST: Optimization instance
         - sens_type -> STR/FUNC: Gradient type, *Default* = 'FD' 
         - store_sol -> BOOL: Store solution in Optimization class flag,
@@ -133,11 +134,12 @@ class FILTERSD(Optimizer):
                        *Default* = False
         - sens_mode -> STR: Flag for parallel gradient calculation,
                        *Default* = ''
-        - sens_step -> FLOAT: Sensitivity setp size,
+        - sens_step -> FLOAT: Sensitivity step size,
                        *Default* = {} [corresponds to 1e-6 (FD), 1e-20(CS)]
-        
-        Additional arguments and keyword arguments are passed to the objective function call.
-        
+
+        Additional arguments and keyword arguments are passed to the objective
+        function call.
+
         Documentation last updated:  February. 2, 2013 - Ruben E. Perez
 
         """
@@ -241,7 +243,7 @@ class FILTERSD(Optimizer):
                 f = ff
 
             # Constraints Assigment
-            for i in range(len(opt_problem._constraints.keys())):
+            for i in range(len(opt_problem.constraints.keys())):
                 if isinstance(gg[i], complex):
                     g[i] = gg[i].astype(float)
                 else:
@@ -271,11 +273,11 @@ class FILTERSD(Optimizer):
                         hos_file.close()
                     else:
                         dff = vals['grad_obj'][0].reshape((len(
-                            opt_problem._objectives.keys()), len(
-                            opt_problem._variables.keys())))
+                            opt_problem.objectives.keys()), len(
+                            opt_problem.variables.keys())))
                         dgg = vals['grad_con'][0].reshape((len(
-                            opt_problem._constraints.keys()), len(
-                            opt_problem._variables.keys())))
+                            opt_problem.constraints.keys()), len(
+                            opt_problem.variables.keys())))
 
                 if self.pll:
                     self.h_start = Bcast(self.h_start, root=0)
@@ -286,7 +288,7 @@ class FILTERSD(Optimizer):
             if not self.h_start:
                 #
                 dff, dgg = gradient.getGrad(x, group_ids, [f], g[0:len(
-                    opt_problem._constraints.keys())], *args, **kwargs)
+                    opt_problem.constraints.keys())], *args, **kwargs)
 
             # Store History
             if self.sto_hst and (myrank == 0):
@@ -294,24 +296,24 @@ class FILTERSD(Optimizer):
                 log_file.write(dgg, 'grad_con')
 
             # Gradient Assignment
-            for i in range(len(opt_problem._variables.keys())):
+            for i in range(len(opt_problem.variables.keys())):
                 a[i, 0] = dff[0, i]
 
-            for i in range(len(opt_problem._variables.keys())):
-                for j in range(len(opt_problem._constraints.keys())):
+            for i in range(len(opt_problem.variables.keys())):
+                for j in range(len(opt_problem.constraints.keys())):
                     a[i, j + 1] = dgg[j, i]
 
             return a
 
         # Variables Handling
-        nvar = len(opt_problem._variables.keys())
+        nvar = len(opt_problem.variables.keys())
         xl = []
         xu = []
         xx = []
-        for key in opt_problem._variables.keys():
-            xl.append(opt_problem._variables[key].lower)
-            xu.append(opt_problem._variables[key].upper)
-            xx.append(opt_problem._variables[key].value)
+        for key in opt_problem.variables.keys():
+            xl.append(opt_problem.variables[key].lower)
+            xu.append(opt_problem.variables[key].upper)
+            xx.append(opt_problem.variables[key].value)
 
         xl = numpy.array(xl)
         xu = numpy.array(xu)
@@ -321,21 +323,21 @@ class FILTERSD(Optimizer):
         group_ids = {}
         if opt_problem.use_groups:
             k = 0
-            for key in opt_problem._vargroups.keys():
-                group_len = len(opt_problem._vargroups[key]['ids'])
-                group_ids[opt_problem._vargroups[key]['name']] = [k,
+            for key in opt_problem.vargroups.keys():
+                group_len = len(opt_problem.vargroups[key]['ids'])
+                group_ids[opt_problem.vargroups[key]['name']] = [k,
                                                                   k + group_len]
                 k += group_len
 
         # Constraints Handling
-        ncon = len(opt_problem._constraints.keys())
+        ncon = len(opt_problem.constraints.keys())
         gg = []
         if ncon > 0:
-            for key in opt_problem._constraints.keys():
-                if opt_problem._constraints[key].type == 'e':
+            for key in opt_problem.constraints.keys():
+                if opt_problem.constraints[key].type == 'e':
                     raise IOError('FILTERSD cannot handle equality constraints')
 
-                gg.append(opt_problem._constraints[key].value)
+                gg.append(opt_problem.constraints[key].value)
 
             gg = numpy.array(gg, numpy.float)
         else:
@@ -344,10 +346,10 @@ class FILTERSD(Optimizer):
 
         # Objective Handling
         objfunc = opt_problem.obj_fun
-        nobj = len(opt_problem._objectives.keys())
+        nobj = len(opt_problem.objectives.keys())
         ff = []
-        for key in opt_problem._objectives.keys():
-            ff.append(opt_problem._objectives[key].value)
+        for key in opt_problem.objectives.keys():
+            ff.append(opt_problem.objectives[key].value)
 
         ff = numpy.array(ff, numpy.float)
 
@@ -430,20 +432,20 @@ class FILTERSD(Optimizer):
 
             sol_evals = nfevs[0] + ngevs[0] * nvar
 
-            sol_vars = copy.deepcopy(opt_problem._variables)
+            sol_vars = copy.deepcopy(opt_problem.variables)
             i = 0
             for key in sol_vars.keys():
                 sol_vars[key].value = xx[i]
                 i += 1
 
-            sol_objs = copy.deepcopy(opt_problem._objectives)
+            sol_objs = copy.deepcopy(opt_problem.objectives)
             i = 0
             for key in sol_objs.keys():
                 sol_objs[key].value = ff[i]
                 i += 1
 
             if ncon > 0:
-                sol_cons = copy.deepcopy(opt_problem._constraints)
+                sol_cons = copy.deepcopy(opt_problem.constraints)
                 i = 0
                 for key in sol_cons.keys():
                     sol_cons[key].value = gg[i]

@@ -91,7 +91,7 @@ class Optimizer(object):
         for key in kopt_keys:
             self.setOption(key, koptions[key])
 
-    def __solve__(self, opt_problem=None, *args, **kwargs):
+    def __solve__(self, opt_problem, *args, **kwargs):
         """Run Optimizer (Optimizer Specific Routine)
         
         **Keyword arguments:**

@@ -100,26 +100,35 @@ class FSQP(Optimizer):
         }
         informs = {
             0: 'Normal termination of execution',
-            1: 'User-provided initial guess is infeasible for linear constraints, unable to generate a point satisfying all these constraints',
-            2: 'User-provided initial guess is infeasible for nonlinear inequality constraints and linear constraints, unable to generate a point satisfying all these constraints',
-            3: 'The maximum number of iterations has been reached before a solution is obtained',
+            1: 'User-provided initial guess is infeasible for linear '
+               'constraints, unable to generate a point satisfying '
+               'all these constraints',
+            2: 'User-provided initial guess is infeasible for nonlinear '
+               'inequality constraints and linear constraints, unable to '
+               'generate a point satisfying all these constraints',
+            3: 'The maximum number of iterations has been reached before '
+               'a solution is obtained',
             4: 'The line search fails to find a new iterate',
-            5: 'Failure of the QP solver in attempting to construct d0, a more robust QP solver may succeed',
-            6: 'Failure of the QP solver in attempting to construct d1, a more robust QP solver may succeed',
+            5: 'Failure of the QP solver in attempting to construct d0, a more '
+               'robust QP solver may succeed',
+            6: 'Failure of the QP solver in attempting to construct d1, a more '
+               'robust QP solver may succeed',
             7: 'Input data are not consistent, check print out error messages',
-            8: 'Two consecutive iterates are numerically equivalent before a stopping criterion is satisfied',
-            9: 'One of the penalty parameters exceeded bigbnd, the algorithm is having trouble satisfying a nonlinear equality constraint',
+            8: 'Two consecutive iterates are numerically equivalent before a '
+               'stopping criterion is satisfied',
+            9: 'One of the penalty parameters exceeded bigbnd, the algorithm '
+               'is having trouble satisfying a nonlinear equality constraint',
         }
         Optimizer.__init__(self, name, category, def_opts, informs, *args,
                            **kwargs)
 
-    def __solve__(self, opt_problem={}, sens_type='FD', store_sol=True,
+    def __solve__(self, opt_problem, sens_type='FD', store_sol=True,
                   store_hst=False, hot_start=False, disp_opts=False,
                   sens_mode='', sens_step={}, *args, **kwargs):
         """Run Optimizer (Optimize Routine)
-        
+
         **Keyword arguments:**
-        
+
         - opt_problem -> INST: Optimization instance
         - sens_type -> STR/FUNC: Gradient type, *Default* = 'FD' 
         - store_sol -> BOOL: Store solution in Optimization class flag,
@@ -134,17 +143,19 @@ class FSQP(Optimizer):
                        *Default* = ''
         - sens_step -> FLOAT: Sensitivity setp size,
                        *Default* = {} [corresponds to 1e-6 (FD), 1e-20(CS)]
-        
-        Additional arguments and keyword arguments are passed to the objective function call.
-        
+
+        Additional arguments and keyword arguments are passed to the objective
+        function call.
+
         Documentation last updated:  February. 2, 2011 - Ruben E. Perez
+
         """
         nec = 0
         nic = 0
-        for key in opt_problem._constraints.keys():
-            if opt_problem._constraints[key].type == 'e':
+        for key in opt_problem.constraints.keys():
+            if opt_problem.constraints[key].type == 'e':
                 nec += 1
-            if opt_problem._constraints[key].type == 'i':
+            if opt_problem.constraints[key].type == 'i':
                 nic += 1
 
         if self.poa and (sens_mode.lower() == 'pgc'):
@@ -238,7 +249,7 @@ class FSQP(Optimizer):
             if isinstance(f, float):
                 f = [f]
 
-            for i in range(len(opt_problem._objectives.keys())):
+            for i in range(len(opt_problem.objectives.keys())):
                 if isinstance(f[i], complex):
                     ff[i] = f[i].astype(float)
                 else:
@@ -246,7 +257,7 @@ class FSQP(Optimizer):
 
             # Constraints Assignment
             i = 0
-            for j in range(len(opt_problem._constraints.keys())):
+            for j in range(len(opt_problem.constraints.keys())):
                 if isinstance(g[j], complex):
                     gg[i] = g[j].astype(float)
                 else:
@@ -265,11 +276,11 @@ class FSQP(Optimizer):
                         hos_file.close()
                     else:
                         dff = vals['grad_obj'][0].reshape((len(
-                            opt_problem._objectives.keys()), len(
-                            opt_problem._variables.keys())))
+                            opt_problem.objectives.keys()), len(
+                            opt_problem.variables.keys())))
                         dgg = vals['grad_con'][0].reshape((len(
-                            opt_problem._constraints.keys()), len(
-                            opt_problem._variables.keys())))
+                            opt_problem.constraints.keys()), len(
+                            opt_problem.variables.keys())))
 
                 if self.pll:
                     self.h_start = Bcast(self.h_start, root=0)
@@ -317,7 +328,8 @@ class FSQP(Optimizer):
         # ======================================================================
         def cntr(nparam, j, x, gj):
 
-            # for given j, assign to gj the value of the jth constraint evaluated at x
+            # for given j, assign to gj the value of the jth constraint
+            # evaluated at x
 
             if (self.stored_data['x'] != x).any():
                 eval(x)
@@ -344,7 +356,7 @@ class FSQP(Optimizer):
                 eval(x)
 
             df = self.stored_data['df']
-            for i in range(len(opt_problem._variables.keys())):
+            for i in range(len(opt_problem.variables.keys())):
                 gradfj[i] = df[j - 1, i]
 
             return gradfj
@@ -369,14 +381,14 @@ class FSQP(Optimizer):
             return gradgj
 
         # Variables Handling
-        nvar = len(opt_problem._variables.keys())
+        nvar = len(opt_problem.variables.keys())
         xl = []
         xu = []
         xx = []
-        for key in opt_problem._variables.keys():
-            xl.append(opt_problem._variables[key].lower)
-            xu.append(opt_problem._variables[key].upper)
-            xx.append(opt_problem._variables[key].value)
+        for key in opt_problem.variables.keys():
+            xl.append(opt_problem.variables[key].lower)
+            xu.append(opt_problem.variables[key].upper)
+            xx.append(opt_problem.variables[key].value)
 
         xl = numpy.array(xl)
         xu = numpy.array(xu)
@@ -386,31 +398,31 @@ class FSQP(Optimizer):
         group_ids = {}
         if opt_problem.use_groups:
             k = 0
-            for key in opt_problem._vargroups.keys():
-                group_len = len(opt_problem._vargroups[key]['ids'])
-                group_ids[opt_problem._vargroups[key]['name']] = [k,
+            for key in opt_problem.vargroups.keys():
+                group_len = len(opt_problem.vargroups[key]['ids'])
+                group_ids[opt_problem.vargroups[key]['name']] = [k,
                                                                   k + group_len]
                 k += group_len
 
         # Constraints Handling
-        ncon = len(opt_problem._constraints.keys())
+        ncon = len(opt_problem.constraints.keys())
         neqc = 0
         gg = []
         if ncon > 0:
-            for key in opt_problem._constraints.keys():
-                if opt_problem._constraints[key].type == 'e':
+            for key in opt_problem.constraints.keys():
+                if opt_problem.constraints[key].type == 'e':
                     neqc += 1
-                gg.append(opt_problem._constraints[key].value)
+                gg.append(opt_problem.constraints[key].value)
             gg = numpy.array(gg, numpy.float)
         else:
             gg = numpy.array([0], numpy.float)
 
         # Objective Handling
         objfunc = opt_problem.obj_fun
-        nobj = len(opt_problem._objectives.keys())
+        nobj = len(opt_problem.objectives.keys())
         ff = []
-        for key in opt_problem._objectives.keys():
-            ff.append(opt_problem._objectives[key].value)
+        for key in opt_problem.objectives.keys():
+            ff.append(opt_problem.objectives[key].value)
         ff = numpy.array(ff, numpy.float)
 
         # Setup argument list values
@@ -496,20 +508,20 @@ class FSQP(Optimizer):
 
             sol_evals = 0
 
-            sol_vars = copy.deepcopy(opt_problem._variables)
+            sol_vars = copy.deepcopy(opt_problem.variables)
             i = 0
             for key in sol_vars.keys():
                 sol_vars[key].value = xx[i]
                 i += 1
 
-            sol_objs = copy.deepcopy(opt_problem._objectives)
+            sol_objs = copy.deepcopy(opt_problem.objectives)
             i = 0
             for key in sol_objs.keys():
                 sol_objs[key].value = ff[i]
                 i += 1
 
             if ncon > 0:
-                sol_cons = copy.deepcopy(opt_problem._constraints)
+                sol_cons = copy.deepcopy(opt_problem.constraints)
                 i = 0
                 for key in sol_cons.keys():
                     sol_cons[key].value = gg[i]

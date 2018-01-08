@@ -104,17 +104,22 @@ class SOLVOPT(Optimizer):
             -5: 'Objective equals infinity.',
             -6: 'Gradient equals zero or infinity.',
             -7: 'Objective function is unbounded.',
-            -8: 'Gradient zero at the point, but stopping criteria are not fulfilled.',
+            -8: 'Gradient zero at the point, but stopping criteria are not '
+                'fulfilled.',
             -9: 'Iterations limit exceeded.',
-            -11: 'Premature stop is possible. Try to re-run the routine from the obtained point.',
-            -12: 'Result may not provide the optimum. The function apparently has many extremum points.',
-            -13: 'Result may be inaccurate in the coordinates. The function is flat at the optimum.',
-            -14: 'Result may be inaccurate in a function value. The function is extremely steep at the optimum.',
+            -11: 'Premature stop is possible. Try to re-run the routine from '
+                 'the obtained point.',
+            -12: 'Result may not provide the optimum. The function apparently '
+                 'has many extremum points.',
+            -13: 'Result may be inaccurate in the coordinates. The function is '
+                 'flat at the optimum.',
+            -14: 'Result may be inaccurate in a function value. The function '
+                 'is extremely steep at the optimum.',
         }
         Optimizer.__init__(self, name, category, def_opts, informs, *args,
                            **kwargs)
 
-    def __solve__(self, opt_problem={}, sens_type='FD', store_sol=True,
+    def __solve__(self, opt_problem, sens_type='FD', store_sol=True,
                   store_hst=False, hot_start=False, disp_opts=False,
                   sens_mode='', sens_step={}, *args, **kwargs):
         """Run Optimizer (Optimize Routine)
@@ -239,10 +244,12 @@ class SOLVOPT(Optimizer):
                         self.h_start = False
                         hos_file.close()
                     else:
-                        df = vals['grad_obj'][0].reshape((len(opt_problem._objectives.keys()),
-                                                          len(opt_problem._variables.keys())))
-                        dg = vals['grad_con'][0].reshape((len(opt_problem._constraints.keys()),
-                                                          len(opt_problem._variables.keys())))
+                        df = vals['grad_obj'][0].reshape(
+                            (len(opt_problem.objectives.keys()),
+                             len(opt_problem.variables.keys())))
+                        dg = vals['grad_con'][0].reshape(
+                            (len(opt_problem.constraints.keys()),
+                             len(opt_problem.variables.keys())))
 
                 if self.pll:
                     self.h_start = Bcast(self.h_start, root=0)
@@ -268,35 +275,35 @@ class SOLVOPT(Optimizer):
             # Constraints Assignment
             i = 0
             j = 0
-            for j in range(len(opt_problem._constraints.keys())):
+            for j in range(len(opt_problem.constraints.keys())):
                 if isinstance(g[j], complex):
                     gg[i] = g[j].astype(float)
                 else:
                     gg[i] = g[j]
                 i += 1
 
-            for key in opt_problem._variables.keys():
-                if opt_problem._variables[key].lower != -inf:
+            for key in opt_problem.variables.keys():
+                if opt_problem.variables[key].lower != -inf:
                     gg[i] = xl[j] - x[j]
                     i += 1
 
-                if opt_problem._variables[key].upper != inf:
+                if opt_problem.variables[key].upper != inf:
                     gg[i] = x[j] - xu[j]
                     i += 1
 
             # Gradient Assignment
             df = df[0]
-            dgg = numpy.zeros([len(opt_problem._variables.keys()) * 2,
-                               len(opt_problem._variables.keys())], 'd')
-            i = len(opt_problem._constraints.keys())
+            dgg = numpy.zeros([len(opt_problem.variables.keys()) * 2,
+                               len(opt_problem.variables.keys())], 'd')
+            i = len(opt_problem.constraints.keys())
             j = 0
-            for key in opt_problem._variables.keys():
-                if opt_problem._variables[key].lower != -inf:
+            for key in opt_problem.variables.keys():
+                if opt_problem.variables[key].lower != -inf:
                     if gg[i] > 0:
                         dgg[j, j] = -1
                     i += 1
 
-                if opt_problem._variables[key].upper != inf:
+                if opt_problem.variables[key].upper != inf:
                     if gg[i] > 0:
                         dgg[j, j] = 1
                     i += 1
@@ -336,15 +343,15 @@ class SOLVOPT(Optimizer):
             # Constraints Maximal Residual
             maxg = numpy.zeros([len(self.stored_data['g'])], float)
             i = 0
-            for key in opt_problem._constraints.keys():
-                if opt_problem._constraints[key].type == 'e':
+            for key in opt_problem.constraints.keys():
+                if opt_problem.constraints[key].type == 'e':
                     maxg[i] = abs(self.stored_data['g'][i])
                     i += 1
-                elif opt_problem._constraints[key].type == 'i':
+                elif opt_problem.constraints[key].type == 'i':
                     maxg[i] = max(0, self.stored_data['g'][i])
                     i += 1
 
-            for j in range(len(opt_problem._constraints),
+            for j in range(len(opt_problem.constraints),
                             len(self.stored_data['g'])):
                 maxg[i] = max(0, self.stored_data['g'][i])
                 i += 1
@@ -376,15 +383,15 @@ class SOLVOPT(Optimizer):
             # Constraints Maximal Residual
             maxg = numpy.zeros([len(self.stored_data['g'])], float)
             i = 0
-            for key in opt_problem._constraints.keys():
-                if opt_problem._constraints[key].type == 'e':
+            for key in opt_problem.constraints.keys():
+                if opt_problem.constraints[key].type == 'e':
                     maxg[i] = abs(self.stored_data['g'][i])
                     i += 1
-                elif opt_problem._constraints[key].type == 'i':
+                elif opt_problem.constraints[key].type == 'i':
                     maxg[i] = max(0, self.stored_data['g'][i])
                     i += 1
 
-            for j in range(len(opt_problem._constraints),
+            for j in range(len(opt_problem.constraints),
                             len(self.stored_data['g'])):
                 maxg[i] = max(0, self.stored_data['g'][i])
                 i += 1
@@ -396,18 +403,18 @@ class SOLVOPT(Optimizer):
             return dg
 
         # Variables Handling
-        nvar = len(opt_problem._variables.keys())
+        nvar = len(opt_problem.variables.keys())
         xl = []
         xu = []
         xx = []
-        for key in opt_problem._variables.keys():
-            if opt_problem._variables[key].type == 'c':
-                xl.append(opt_problem._variables[key].lower)
-                xu.append(opt_problem._variables[key].upper)
-                xx.append(opt_problem._variables[key].value)
-            elif opt_problem._variables[key].type == 'i':
+        for key in opt_problem.variables.keys():
+            if opt_problem.variables[key].type == 'c':
+                xl.append(opt_problem.variables[key].lower)
+                xu.append(opt_problem.variables[key].upper)
+                xx.append(opt_problem.variables[key].value)
+            elif opt_problem.variables[key].type == 'i':
                 raise IOError('SOLVOPT cannot handle integer design variables')
-            elif opt_problem._variables[key].type == 'd':
+            elif opt_problem.variables[key].type == 'd':
                 raise IOError('SOLVOPT cannot handle discrete design variables')
 
         xl = numpy.array(xl)
@@ -418,31 +425,31 @@ class SOLVOPT(Optimizer):
         group_ids = {}
         if opt_problem.use_groups:
             k = 0
-            for key in opt_problem._vargroups.keys():
-                group_len = len(opt_problem._vargroups[key]['ids'])
-                group_ids[opt_problem._vargroups[key]['name']] = [k,
+            for key in opt_problem.vargroups.keys():
+                group_len = len(opt_problem.vargroups[key]['ids'])
+                group_ids[opt_problem.vargroups[key]['name']] = [k,
                                                                   k + group_len]
                 k += group_len
 
         # Constraints Handling
-        ncon = len(opt_problem._constraints.keys())
+        ncon = len(opt_problem.constraints.keys())
         neqc = 0
         gg = []
         if ncon > 0:
-            for key in opt_problem._constraints.keys():
-                if opt_problem._constraints[key].type == 'e':
+            for key in opt_problem.constraints.keys():
+                if opt_problem.constraints[key].type == 'e':
                     neqc += 1
 
-                # gg.append(opt_problem._constraints[key].value)
-                gg.append(opt_problem._constraints[key].upper)
+                # gg.append(opt_problem.constraints[key].value)
+                gg.append(opt_problem.constraints[key].upper)
 
         nadd = 0
-        for key in opt_problem._variables.keys():
-            if opt_problem._variables[key].lower != -inf:
+        for key in opt_problem.variables.keys():
+            if opt_problem.variables[key].lower != -inf:
                 gg.append(0)
                 nadd += 1
 
-            if opt_problem._variables[key].upper != inf:
+            if opt_problem.variables[key].upper != inf:
                 gg.append(0)
                 nadd += 1
 
@@ -450,10 +457,10 @@ class SOLVOPT(Optimizer):
 
         # Objective Handling
         objfunc = opt_problem.obj_fun
-        nobj = len(opt_problem._objectives.keys())
+        nobj = len(opt_problem.objectives.keys())
         ff = []
-        for key in opt_problem._objectives.keys():
-            ff.append(opt_problem._objectives[key].value)
+        for key in opt_problem.objectives.keys():
+            ff.append(opt_problem.objectives[key].value)
 
         ff = numpy.array(ff, numpy.float)
 
@@ -546,20 +553,20 @@ class SOLVOPT(Optimizer):
             # assumes cnst fevals and gevals are included in feval & geval
             sol_evals = options[9] + options[10]
 
-            sol_vars = copy.deepcopy(opt_problem._variables)
+            sol_vars = copy.deepcopy(opt_problem.variables)
             i = 0
             for key in sol_vars.keys():
                 sol_vars[key].value = xx[i]
                 i += 1
 
-            sol_objs = copy.deepcopy(opt_problem._objectives)
+            sol_objs = copy.deepcopy(opt_problem.objectives)
             i = 0
             for key in sol_objs.keys():
                 sol_objs[key].value = ff[i]
                 i += 1
 
             if ncon > 0:
-                sol_cons = copy.deepcopy(opt_problem._constraints)
+                sol_cons = copy.deepcopy(opt_problem.constraints)
                 i = 0
                 for key in sol_cons.keys():
                     sol_cons[key].value = gg[i]
