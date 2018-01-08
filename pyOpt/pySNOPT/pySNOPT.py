@@ -376,7 +376,8 @@ class SNOPT(Optimizer):
             nproc = comm.Get_size()
             if mpi4py.__version__[0] == '0':
                 Bcast = comm.Bcast
-            elif mpi4py.__version__[0] == '1':
+            # elif mpi4py.__version__[0] == '1':
+            else:  # version can be 1, 2, 3 .... or more
                 Bcast = comm.bcast
 
             self.pll = True
@@ -450,7 +451,7 @@ class SNOPT(Optimizer):
                 return mode
 
             # Gradients
-            if mode <> 0 and self.h_start:
+            if mode != 0 and self.h_start:
                 if myrank == 0:
                     [vals, hist_end] = hos_file.read(
                         ident=['grad_obj', 'grad_con'])

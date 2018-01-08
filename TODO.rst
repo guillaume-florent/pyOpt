@@ -23,6 +23,10 @@ Should there be a README in each subpackage? in the source directories?
 
 ******** Machine precision code duplication in subpackages
 
+private attributes for optimization problem -> why?
+
+In subpackages, the eventia ImportError on mpi4py is caught but not re-raised
+
 Miscellaneous
 -------------
 

@@ -167,7 +167,8 @@ class NLPQLP(Optimizer):
                 Barrier = comm.Barrier
                 Send = comm.Send
                 Recv = comm.Recv
-            elif mpi4py.__version__[0] == '1':
+            # elif mpi4py.__version__[0] == '1':
+            else:  # version can be 1, 2, 3 .... or more
                 Bcast = comm.bcast
                 Barrier = comm.barrier
                 Send = comm.send

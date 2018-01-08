@@ -123,14 +123,21 @@ class SOLVOPT(Optimizer):
         
         - opt_problem -> INST: Optimization instance
         - sens_type -> STR/FUNC: Gradient type, *Default* = 'FD' 
-        - store_sol -> BOOL: Store solution in Optimization class flag, *Default* = True 
-        - disp_opts -> BOOL: Flag to display options in solution text, *Default* = False
-        - store_hst -> BOOL/STR: Flag/filename to store optimization history, *Default* = False
-        - hot_start -> BOOL/STR: Flag/filename to read optimization history, *Default* = False
-        - sens_mode -> STR: Flag for parallel gradient calculation, *Default* = ''
-        - sens_step -> FLOAT: Sensitivity setp size, *Default* = {} [corresponds to 1e-6 (FD), 1e-20(CS)]
+        - store_sol -> BOOL: Store solution in Optimization class flag,
+                       *Default* = True 
+        - disp_opts -> BOOL: Flag to display options in solution text,
+                       *Default* = False
+        - store_hst -> BOOL/STR: Flag/filename to store optimization history,
+                       *Default* = False
+        - hot_start -> BOOL/STR: Flag/filename to read optimization history,
+                       *Default* = False
+        - sens_mode -> STR: Flag for parallel gradient calculation,
+                       *Default* = ''
+        - sens_step -> FLOAT: Sensitivity step size,
+                       *Default* = {} [corresponds to 1e-6 (FD), 1e-20(CS)]
         
-        Additional arguments and keyword arguments are passed to the objective function call.
+        Additional arguments and keyword arguments are passed to the objective
+        function call.
         
         Documentation last updated:  February. 2, 2011 - Peter W. Jansen
 
@@ -152,7 +159,8 @@ class SOLVOPT(Optimizer):
             nproc = comm.Get_size()
             if mpi4py.__version__[0] == '0':
                 Bcast = comm.Bcast
-            elif mpi4py.__version__[0] == '1':
+            # elif mpi4py.__version__[0] == '1':
+            else:  # version can be 1, 2, 3 .... or more
                 Bcast = comm.bcast
 
             self.pll = True
@@ -231,12 +239,10 @@ class SOLVOPT(Optimizer):
                         self.h_start = False
                         hos_file.close()
                     else:
-                        df = vals['grad_obj'][0].reshape((len(
-                            opt_problem._objectives.keys()), len(
-                            opt_problem._variables.keys())))
-                        dg = vals['grad_con'][0].reshape((len(
-                            opt_problem._constraints.keys()), len(
-                            opt_problem._variables.keys())))
+                        df = vals['grad_obj'][0].reshape((len(opt_problem._objectives.keys()),
+                                                          len(opt_problem._variables.keys())))
+                        dg = vals['grad_con'][0].reshape((len(opt_problem._constraints.keys()),
+                                                          len(opt_problem._variables.keys())))
 
                 if self.pll:
                     self.h_start = Bcast(self.h_start, root=0)

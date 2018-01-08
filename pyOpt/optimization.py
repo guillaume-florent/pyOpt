@@ -114,6 +114,22 @@ class Optimization(object):
         # Initialize Solution Set
         self._solutions = {}
 
+    @property
+    def variables(self):
+        return self._variables
+
+    @property
+    def objectives(self):
+        return self._objectives
+
+    @property
+    def constraints(self):
+        return self._constraints
+
+    @property
+    def solutions(self):
+        return self._solutions
+
     def getVar(self, i):
         """Get Variable *i* from Variables Set
         
