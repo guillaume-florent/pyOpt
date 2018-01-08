@@ -15,7 +15,7 @@
 from __future__ import print_function
 
 # from pyOpt import *
-from pyOpt.pyOpt_optimization import Optimization
+from pyOpt.optimization import Optimization
 from pyOpt.pyPSQP.pyPSQP import PSQP
 from pyOpt.pySLSQP.pySLSQP import SLSQP
 from pyOpt.pyCONMIN.pyCONMIN import CONMIN

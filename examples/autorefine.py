@@ -8,7 +8,7 @@ from __future__ import print_function
 
 from numpy import cos, pi, exp
 
-from pyOpt.pyOpt_optimization import Optimization
+from pyOpt.optimization import Optimization
 from pyOpt.pyNSGA2.pyNSGA2 import NSGA2
 from pyOpt.pySLSQP.pySLSQP import SLSQP
 

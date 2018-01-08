@@ -26,7 +26,7 @@ except:
     raise ImportError('mpi4py is required for parallelization')
 
 # from pyOpt import *
-from pyOpt.pyOpt_optimization import Optimization
+from pyOpt.optimization import Optimization
 from pyOpt.pyALPSO.pyALPSO import ALPSO
 
 

@@ -1,7 +1,7 @@
 
 Python3 compatibility
 
-Import system is a bit weird (using __all_ defined in subpackage to append to pyOpt __all_) -> confusing -> simplify
+******** Import system is a bit weird (using __all_ defined in subpackage to append to pyOpt __all_) -> confusing -> simplify
 
 Doc
 ---

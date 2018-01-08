@@ -34,9 +34,9 @@ import os
 
 import numpy
 
-from pyOpt.pyOpt_variable import Variable
-from pyOpt.pyOpt_objective import Objective
-from pyOpt.pyOpt_constraint import Constraint
+from pyOpt.variable import Variable
+from pyOpt.objective import Objective
+from pyOpt.constraint import Constraint
 
 __version__ = '$Revision: $'
 

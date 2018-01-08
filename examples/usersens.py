@@ -13,7 +13,7 @@ from __future__ import print_function
 
 import numpy
 
-from pyOpt.pyOpt_optimization import Optimization
+from pyOpt.optimization import Optimization
 from pyOpt.pyCONMIN.pyCONMIN import CONMIN
 
 

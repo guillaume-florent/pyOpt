@@ -45,8 +45,8 @@ import time
 
 import numpy
 
-from pyOpt.pyOpt_optimizer import Optimizer
-from pyOpt.pyOpt_gradient import Gradient
+from pyOpt.optimizer import Optimizer
+from pyOpt.gradient import Gradient
 
 __version__ = '$Revision: $'
 

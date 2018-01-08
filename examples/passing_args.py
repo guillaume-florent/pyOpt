@@ -18,7 +18,7 @@
 from __future__ import print_function
 
 # from pyOpt import *
-from pyOpt.pyOpt_optimization import Optimization
+from pyOpt.optimization import Optimization
 from pyOpt.pySLSQP.pySLSQP import SLSQP
 
 

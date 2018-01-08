@@ -31,7 +31,7 @@ try:
 except:
     raise ImportError('ALHSO shared library failed to import')
 
-from pyOpt.pyOpt_optimizer import Optimizer
+from pyOpt.optimizer import Optimizer
 
 __version__ = '$Revision: $'
 
