@@ -1,5 +1,5 @@
 
-Python 2 and 3 compatibility
+******** Python 2 and 3 compatibility
 
 ******** Import system is a bit weird (using __all_ defined in subpackage to append to pyOpt __all_) -> confusing -> simplify
 
@@ -21,7 +21,7 @@ Documentation last updated by -> delete
 
 Should there be a README in each subpackage? in the source directories?
 
-Machine precision code duplication in subpackages
+******** Machine precision code duplication in subpackages
 
 Miscellaneous
 -------------

@@ -33,17 +33,13 @@ except:
     raise ImportError('ALHSO shared library failed to import')
 
 from pyOpt.optimizer import Optimizer
+from pyOpt.utils import machine_precision
 
 __version__ = '$Revision: $'
 
 inf = 10.E+20  # define a value for infinity
 
-eps = 1.0  # define a value for machine precision
-while (eps / 2.0 + 1.0) > 1.0:
-    eps /= 2.0
-
-eps *= 2.0
-
+eps = machine_precision()
 # eps = math.ldexp(1,-52)
 
 
