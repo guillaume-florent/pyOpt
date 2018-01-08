@@ -32,7 +32,8 @@ History
 from __future__ import print_function
 
 try:
-    import conmin
+    # import conmin
+    from . import conmin
 except:
     raise ImportError('CONMIN shared library failed to import')
 

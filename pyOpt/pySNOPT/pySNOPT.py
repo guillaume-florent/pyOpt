@@ -48,7 +48,8 @@ History
 from __future__ import print_function
 
 try:
-    import snopt
+    # import snopt
+    from . import snopt
 except:
     raise ImportError('SNOPT shared library failed to import')
 

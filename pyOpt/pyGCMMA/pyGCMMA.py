@@ -34,7 +34,8 @@ History
 from __future__ import print_function
 
 try:
-    import gcmma
+    # import gcmma
+    from . import gcmma
 except:
     raise ImportError('GCMMA shared library failed to import')
 
@@ -516,7 +517,8 @@ class GCMMA(Optimizer):
             sol_name = 'GCMMA Solution to ' + opt_problem.name
 
             sol_options = copy.copy(self.options)
-            if sol_options.has_key('defaults'):
+            # if sol_options.has_key('defaults'):
+            if 'display_opts' in sol_options:
                 del sol_options['defaults']
 
             sol_evals = iter

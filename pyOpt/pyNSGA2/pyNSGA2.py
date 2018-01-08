@@ -29,7 +29,8 @@ History
 from __future__ import print_function
 
 try:
-    import nsga2
+    # import nsga2
+    from . import nsga2
 except:
     raise ImportError('NSGA-II shared library failed to import')
 
@@ -431,5 +432,5 @@ class NSGA2(Optimizer):
 if __name__ == '__main__':
     # Test NSGA2
     print('Testing ...')
-    nsga2 = NSGA2()
-    print(nsga2)
+    nsga2_ = NSGA2()
+    print(nsga2_)

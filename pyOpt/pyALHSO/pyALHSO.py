@@ -27,7 +27,8 @@ import time
 import numpy
 
 try:
-    import alhso
+    # import alhso
+    from . import alhso
 except:
     raise ImportError('ALHSO shared library failed to import')
 
@@ -410,7 +411,8 @@ class ALHSO(Optimizer):
             sol_name = 'ALHSO Solution to ' + opt_problem.name
 
             sol_options = copy.copy(self.options)
-            if sol_options.has_key('defaults'):
+            # if sol_options.has_key('defaults'):
+            if 'defaults' in sol_options:
                 del sol_options['defaults']
 
             sol_inform = {}
@@ -548,7 +550,8 @@ class HSO(Optimizer):
         Documentation last updated:  May. 16, 2008 - Ruben E. Perez
 
         """
-        if kwargs.has_key('display_opts'):
+        # if kwargs.has_key('display_opts'):
+        if 'display_opts' in kwargs:
             sol_dispOpt = kwargs['display_opts']
             del kwargs['display_opts']
         else:

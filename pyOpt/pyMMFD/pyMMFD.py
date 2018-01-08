@@ -29,7 +29,8 @@ History
 from __future__ import print_function
 
 try:
-    import mmfd
+    # import mmfd
+    from . import mmfd
 except:
     raise ImportError('MMFD shared library failed to import')
 

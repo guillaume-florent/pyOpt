@@ -29,7 +29,8 @@ History
 from __future__ import print_function
 
 try:
-    import psqp
+    # import psqp
+    from . import psqp
 except:
     raise ImportError('PSQP shared library failed to import')
 

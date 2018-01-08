@@ -34,7 +34,8 @@ History
 from __future__ import print_function
 
 try:
-    import ffsqp
+    # import ffsqp
+    from . import ffsqp
 except:
     raise ImportError('FSQP shared library failed to import')
 
@@ -339,13 +340,14 @@ class FSQP(Optimizer):
         # ======================================================================
         def gradobj(nparam, j, x, gradfj, obj):
 
-            # assign to gradfj the gradient of the jth objective function evaluated at x
+            # assign to gradfj the gradient of the jth objective
+            # function evaluated at x
 
             if (self.stored_data['x'] != x).any():
                 eval(x)
 
             df = self.stored_data['df']
-            for i in xrange(len(opt_problem._variables.keys())):
+            for i in range(len(opt_problem._variables.keys())):
                 gradfj[i] = df[j - 1, i]
 
             return gradfj
@@ -491,7 +493,8 @@ class FSQP(Optimizer):
             sol_name = 'FSQP Solution to ' + opt_problem.name
 
             sol_options = copy.copy(self.options)
-            if sol_options.has_key('defaults'):
+            # if sol_options.has_key('defaults'):
+            if 'defaults' in sol_options:
                 del sol_options['defaults']
 
             sol_evals = 0

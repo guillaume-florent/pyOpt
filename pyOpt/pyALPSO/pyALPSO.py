@@ -63,7 +63,8 @@ class ALPSO(Optimizer):
         """
         if pll_type is None:
             try:
-                import alpso as alpso
+                # import alpso as alpso
+                from . import alpso
             except:
                 raise ImportError('pyALPSO: ALPSO shared library '
                                   'failed to import')
@@ -72,7 +73,8 @@ class ALPSO(Optimizer):
             self.alpso = alpso
         elif pll_type.upper() == 'SPM':
             try:
-                import alpso_spm
+                # import alpso_spm
+                from . import alpso_spm
                 from mpi4py import MPI
             except:
                 raise ImportError('pyALPSO: ALPSO SPM shared library '
@@ -85,7 +87,8 @@ class ALPSO(Optimizer):
             #     raise ImportError('pyALPSO: ALPSO DPM shared
             #                       library failed to import')
             try:
-                import alpso_dpm
+                # import alpso_dpm
+                from . import alpso_dpm
                 from mpi4py import MPI
             except:
                 raise ImportError('pyALPSO: ALPSO DPM shared library '
@@ -95,7 +98,8 @@ class ALPSO(Optimizer):
             self.alpso = alpso_dpm
         elif pll_type.upper() == 'POA':
             try:
-                import alpso_poa
+                # import alpso_poa
+                from . import alpso_poa
                 from mpi4py import MPI
             except:
                 raise ImportError(
@@ -434,7 +438,8 @@ class ALPSO(Optimizer):
             sol_name = 'ALPSO Solution to ' + opt_problem.name
 
             sol_options = copy.copy(self.options)
-            if sol_options.has_key('defaults'):
+            # if sol_options.has_key('defaults'):
+            if 'defaults' in sol_options:
                 del sol_options['defaults']
 
             sol_inform = {}

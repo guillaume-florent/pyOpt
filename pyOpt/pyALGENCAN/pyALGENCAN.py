@@ -26,7 +26,8 @@ History
 from __future__ import print_function
 
 try:
-    import algencan
+    # import algencan
+    from . import algencan
 except ImportError:
     raise ImportError('ALGENCAN shared library failed to import')
 

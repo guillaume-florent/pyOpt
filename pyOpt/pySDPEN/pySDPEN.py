@@ -27,7 +27,8 @@ History
 from __future__ import print_function
 
 try:
-    import sdpen
+    # import sdpen
+    from . import sdpen
 except ImportError:
     raise ImportError('SDPEN shared library failed to import')
 

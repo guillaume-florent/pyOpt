@@ -26,7 +26,8 @@ History
 from __future__ import print_function
 
 try:
-    import nlpqlp
+    # import nlpqlp
+    from . import nlpqlp
 except:
     raise ImportError('NLPQLP shared library failed to import')
 

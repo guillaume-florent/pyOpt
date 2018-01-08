@@ -852,7 +852,8 @@ class Optimization(object):
         outfile.write(ftext)
         # if disp_sols or kwargs.has_key('solutions'):
         if disp_sols or 'solutions' in kwargs:
-            if kwargs.has_key('solutions'):
+            # if kwargs.has_key('solutions'):
+            if 'solutions' in kwargs:
                 sol_indices = kwargs['solutions']
             else:
                 sol_indices = self._solutions.keys()
@@ -951,7 +952,6 @@ class Solution(Optimization):
         Documentation last updated:  April. 30, 2008 - Peter W. Jansen
 
         """
-
         text0 = Optimization.__str__(self)
         text1 = ''
         lines = text0.split('\n')

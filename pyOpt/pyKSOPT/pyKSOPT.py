@@ -30,7 +30,8 @@ History
 from __future__ import print_function
 
 try:
-    import ksopt
+    # import ksopt
+    from . import ksopt
 except:
     raise ImportError('KSOPT shared library failed to import')
 

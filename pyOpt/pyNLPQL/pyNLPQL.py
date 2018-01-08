@@ -38,7 +38,8 @@ History
 from __future__ import print_function
 
 try:
-    import nlpql
+    # import nlpql
+    from . import nlpql
 except:
     raise ImportError('NLPQL shared library failed to import')
 

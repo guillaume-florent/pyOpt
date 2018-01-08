@@ -32,7 +32,8 @@ History
 from __future__ import   print_function
 
 try:
-    import slsqp
+    # import slsqp
+    from . import slsqp
 except ImportError:
     raise ImportError('SLSQP shared library failed to import')
 
@@ -419,7 +420,8 @@ class SLSQP(Optimizer):
             sol_name = 'SLSQP Solution to ' + opt_problem.name
 
             sol_options = copy.copy(self.options)
-            if sol_options.has_key('defaults'):
+            # if sol_options.has_key('defaults'):
+            if 'defaults' in sol_options:
                 del sol_options['defaults']
 
             sol_evals = 0

@@ -31,7 +31,8 @@ History
 from __future__ import print_function
 
 try:
-    import midaco
+    # import midaco
+    from . import midaco
 except:
     raise ImportError('MIDACO shared library failed to import')
 

@@ -35,7 +35,8 @@ History
 from __future__ import print_function
 
 try:
-    import mma
+    # import mma
+    from . import mma
 except:
     raise ImportError('MMA shared library failed to import')
 

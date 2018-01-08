@@ -27,7 +27,8 @@ History
 from __future__ import print_function
 
 try:
-    import filtersd
+    # import filtersd
+    from . import filtersd
 except:
     raise ImportError('FILTERSD shared library failed to import')
 

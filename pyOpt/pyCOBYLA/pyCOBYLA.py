@@ -31,7 +31,8 @@ History
 from __future__ import print_function
 
 try:
-    import cobyla
+    # import cobyla
+    from . import cobyla
 except:
     raise ImportError('COBYLA shared library failed to import')
 
@@ -357,7 +358,8 @@ class COBYLA(Optimizer):
             sol_name = 'COBYLA Solution to ' + opt_problem.name
 
             sol_options = copy.copy(self.options)
-            if sol_options.has_key('defaults'):
+            # if sol_options.has_key('defaults'):
+            if 'defaults' in sol_options:
                 del sol_options['defaults']
 
             sol_evals = nfvals[0]

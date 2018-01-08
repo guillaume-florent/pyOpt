@@ -4,7 +4,7 @@ username="$USER"
 user="$(id -u)"
 home="${1:-$HOME}"
 
-imageName="guillaume-florent/pyopt:1.2.1"
+imageName="guillaume-florent/pyopt:2.1.0"
 containerName="pyopt"
 displayVar="$DISPLAY"
 
